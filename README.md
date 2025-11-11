@@ -1,2 +1,2 @@
-# Team12, STA 160
-# Predicting Housing Prices in California Website
+# Team 12, STA 160
+## Predicting Housing Prices in California Website
