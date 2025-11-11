@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>California Housing Dashboard</title>
+
+  <!-- 站点样式 -->
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+<div class="nav-wrap">
+  <nav class="nav">
+    <div class="brand">California Housing</div>
+    <a href="index.html"     class="active">Home</a>
+    <a href="map.html">Interactive Map & Statistics</a>
+    <a href="predictor.html">Housing Price Prediction Tool</a>
+    <a href="trends.html">Housing Trends Dashboard</a>
+  </nav>
+</div>
+
+  <main class="container">
+  <section class="card">
+    <h1>California Housing Dashboard</h1>
+    <p class="caption">Explore county-level housing & Airbnb signals. Use the tabs above to navigate.</p>
+  </section>
+
+  <!-- 放一个“入口卡片” -->
+  <section class="card">
+    <h2>Start here</h2>
+    <p>Try the interactive map, run the (placeholder) price predictor, or view trends.</p>
+    <div style="display:flex; gap:12px; flex-wrap:wrap">
+      <a class="nav-btn" href="map.html"><button>Open Map</button></a>
+      <a class="nav-btn" href="predictor.html"><button>Price Predictor</button></a>
+      <a class="nav-btn" href="trends.html"><button>Trends</button></a>
+    </div>
+  </section>
+</main>
+
+<div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
+
+  <!-- 首页不需要地图/CSV脚本，所以不引入 app.js、MapLibre、PapaParse -->
+</body>
+
+</html>

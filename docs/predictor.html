@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Housing Price Prediction Tool</title>
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script defer src="assets/js/app.js"></script>
+</head>
+<body>
+
+
+  <div class="container">
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="map.html">Interactive Map & Statistics</a>
+      <a class="active" href="predictor.html">Housing Price Prediction Tool</a>
+      <a href="trends.html">Housing Trends Dashboard</a>
+    </nav>
+
+    <h1>Housing Price Prediction Tool</h1>
+    <p class="caption">Static UI stub — plug your model later.</p>
+
+    <div class="control-row" style="flex-wrap:wrap; gap:12px">
+      <input placeholder="Location (City/Zip Code)" style="flex:1; min-width:260px" />
+      <input placeholder="Bedrooms (e.g., 3)" style="width:180px" />
+      <input placeholder="Bathrooms (e.g., 2)" style="width:180px" />
+      <input placeholder="Square Footage (e.g., 1500)" style="width:220px" />
+      <input placeholder="Total Rooms (e.g., 5)" style="width:180px" />
+      <select style="width:220px">
+        <option>Select proximity to ocean</option>
+        <option>On coast</option>
+        <option>Near coast</option>
+        <option>Inland</option>
+      </select>
+      <button>Predict Price</button>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2 style="margin:0 0 8px 0">Predicted Housing Value</h2>
+      <div style="font-size:40px; font-weight:800">$750,000</div>
+      <p class="caption">This is a placeholder. Hook up your trained model later.</p>
+    </div>
+  </div>
+<div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
+
+</body>
+</html>
