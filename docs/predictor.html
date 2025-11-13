@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Housing Price Prediction Tool</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-  <script defer src="assets/js/app.js"></script>
 </head>
 <body>
 
@@ -143,26 +142,36 @@
 <div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
 
 <script>
-// Update slider values in real-time
-const crimeRateSlider = document.getElementById('crime-rate');
-const crimeRateValue = document.getElementById('crime-rate-value');
-const avgIncomeSlider = document.getElementById('avg-income');
-const avgIncomeValue = document.getElementById('avg-income-value');
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // Update slider values in real-time
+  const crimeRateSlider = document.getElementById('crime-rate');
+  const crimeRateValue = document.getElementById('crime-rate-value');
+  const avgIncomeSlider = document.getElementById('avg-income');
+  const avgIncomeValue = document.getElementById('avg-income-value');
 
-crimeRateSlider.addEventListener('input', (e) => {
-  crimeRateValue.textContent = parseFloat(e.target.value).toFixed(2);
-});
+  if (crimeRateSlider && crimeRateValue) {
+    crimeRateSlider.addEventListener('input', (e) => {
+      crimeRateValue.textContent = parseFloat(e.target.value).toFixed(2);
+    });
+  }
 
-avgIncomeSlider.addEventListener('input', (e) => {
-  const value = parseInt(e.target.value);
-  avgIncomeValue.textContent = '$' + value.toLocaleString();
-});
+  if (avgIncomeSlider && avgIncomeValue) {
+    avgIncomeSlider.addEventListener('input', (e) => {
+      const value = parseInt(e.target.value);
+      avgIncomeValue.textContent = '$' + value.toLocaleString();
+    });
+  }
 
-// Predict button handler
-document.getElementById('predict-btn').addEventListener('click', () => {
-  // This is a placeholder - hook up your model here
-  console.log('Predict button clicked');
-  // You can collect all form values here and send to your prediction API
+  // Predict button handler
+  const predictBtn = document.getElementById('predict-btn');
+  if (predictBtn) {
+    predictBtn.addEventListener('click', () => {
+      // This is a placeholder - hook up your model here
+      console.log('Predict button clicked');
+      // You can collect all form values here and send to your prediction API
+    });
+  }
 });
 </script>
 
