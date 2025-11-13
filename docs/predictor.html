@@ -28,32 +28,143 @@
 </div>
 
   <div class="container">
-
-    <h1>Housing Price Prediction Tool</h1>
-    <p class="caption">Static UI stub — plug your model later.</p>
-
-    <div class="control-row" style="flex-wrap:wrap; gap:12px">
-      <input placeholder="Location (City/Zip Code)" style="flex:1; min-width:260px" />
-      <input placeholder="Bedrooms (e.g., 3)" style="width:180px" />
-      <input placeholder="Bathrooms (e.g., 2)" style="width:180px" />
-      <input placeholder="Square Footage (e.g., 1500)" style="width:220px" />
-      <input placeholder="Total Rooms (e.g., 5)" style="width:180px" />
-      <select style="width:220px">
-        <option>Select proximity to ocean</option>
-        <option>On coast</option>
-        <option>Near coast</option>
-        <option>Inland</option>
-      </select>
-      <button>Predict Price</button>
+    <div class="predictor-header">
+      <h1>Housing Price Prediction Tool</h1>
+      <p class="caption">Provide the details below and our model will estimate the market value of the property.</p>
     </div>
 
-    <div class="card" style="margin-top:16px">
-      <h2 style="margin:0 0 8px 0">Predicted Housing Value</h2>
-      <div style="font-size:40px; font-weight:800">$750,000</div>
-      <p class="caption">This is a placeholder. Hook up your trained model later.</p>
+    <div class="predictor-content">
+      <!-- Left Section: Input Form -->
+      <div class="predictor-form-card">
+        <div class="form-group">
+          <label for="location">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Location (City/Zip Code)
+          </label>
+          <input type="text" id="location" placeholder="e.g., San Francisco, 94105" />
+        </div>
+
+        <div class="form-group">
+          <label for="bedrooms">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            Bedrooms
+          </label>
+          <input type="number" id="bedrooms" placeholder="e.g., 3" />
+        </div>
+
+        <div class="form-group">
+          <label for="bathrooms">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 6L6 3L3 6v6a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V6l-3-3-3 3z"></path>
+              <path d="M9 21V12h6v9"></path>
+            </svg>
+            Bathrooms
+          </label>
+          <input type="number" id="bathrooms" placeholder="e.g., 2" />
+        </div>
+
+        <div class="form-group">
+          <label for="square-footage">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="9" y1="3" x2="9" y2="21"></line>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+            </svg>
+            Square Footage (Living)
+          </label>
+          <input type="number" id="square-footage" placeholder="e.g., 1500" />
+        </div>
+
+        <div class="form-group">
+          <label for="total-rooms">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="3" y1="9" x2="21" y2="9"></line>
+              <line x1="9" y1="21" x2="9" y2="9"></line>
+            </svg>
+            Total Rooms
+          </label>
+          <input type="number" id="total-rooms" placeholder="e.g., 5" />
+        </div>
+
+        <div class="form-group">
+          <label for="crime-rate">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 6v6l4 2"></path>
+            </svg>
+            Crime Rate
+            <span class="slider-value" id="crime-rate-value">0.50</span>
+          </label>
+          <input type="range" id="crime-rate" min="0" max="1" step="0.01" value="0.5" />
+        </div>
+
+        <div class="form-group">
+          <label for="avg-income">
+            <svg class="input-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            Average County Income
+            <span class="slider-value" id="avg-income-value">$235,000</span>
+          </label>
+          <input type="range" id="avg-income" min="70000" max="400000" step="1000" value="235000" />
+        </div>
+
+        <button class="predict-button" id="predict-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+            <polyline points="17 6 23 6 23 12"></polyline>
+          </svg>
+          Predict Price
+        </button>
+      </div>
+
+      <!-- Right Section: Prediction Display -->
+      <div class="predictor-result-card">
+        <div class="result-icon">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#4A90E2" stroke-width="2">
+            <path d="M3 21V9L12 2L21 9V21H14V14H10V21H3Z"></path>
+            <path d="M8 10L12 6L16 10"></path>
+          </svg>
+        </div>
+        <h2>Predicted Housing Value</h2>
+        <div class="predicted-value" id="predicted-value">$750,000</div>
+        <p class="result-disclaimer">This is an estimate based on a predictive model and current market data. Actual market value may vary.</p>
+      </div>
     </div>
   </div>
 <div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
+
+<script>
+// Update slider values in real-time
+const crimeRateSlider = document.getElementById('crime-rate');
+const crimeRateValue = document.getElementById('crime-rate-value');
+const avgIncomeSlider = document.getElementById('avg-income');
+const avgIncomeValue = document.getElementById('avg-income-value');
+
+crimeRateSlider.addEventListener('input', (e) => {
+  crimeRateValue.textContent = parseFloat(e.target.value).toFixed(2);
+});
+
+avgIncomeSlider.addEventListener('input', (e) => {
+  const value = parseInt(e.target.value);
+  avgIncomeValue.textContent = '$' + value.toLocaleString();
+});
+
+// Predict button handler
+document.getElementById('predict-btn').addEventListener('click', () => {
+  // This is a placeholder - hook up your model here
+  console.log('Predict button clicked');
+  // You can collect all form values here and send to your prediction API
+});
+</script>
 
 </body>
 </html>
