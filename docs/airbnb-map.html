@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Interactive Map | California Dashboard</title>
+  <title>Airbnb Map Statistics | California Dashboard</title>
 
   <!-- 全站样式 -->
   <link rel="stylesheet" href="assets/css/style.css" />
@@ -26,8 +26,8 @@
       <span>CalHousing</span>
     </div>
     <a href="index.html">Home</a>
-    <a href="map.html" class="active">Housing Map Statistics</a>
-    <a href="airbnb-map.html">Airbnb Map Statistics</a>
+    <a href="map.html">Housing Map Statistics</a>
+    <a href="airbnb-map.html" class="active">Airbnb Map Statistics</a>
     <a href="predictor.html">Housing Price Prediction</a>
     <a href="trends.html">Housing Trends Dashboard</a>
   </nav>
@@ -39,7 +39,7 @@
     <!-- 地图页内容：只放"权重滑条 + 地图 + 图例" -->
     <section>
       <div class="control-row">
-        <label for="w_h"><b>Weight of housing median:</b></label>
+        <label for="w_h"><b>Weight of Airbnb median:</b></label>
         <input id="w_h" type="range" min="0" max="1" step="0.05" value="0.70" />
         <span id="w_h_label">0.70</span>
       </div>
@@ -52,7 +52,7 @@
     </section>
   </main>
 
-  <!-- 业务脚本（已经处理“元素不存在时不报错”）-->
+  <!-- 业务脚本（已经处理"元素不存在时不报错"）-->
   <script src="assets/js/app.js"></script>
 <div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
 

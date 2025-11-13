@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>California Housing Dashboard</title>
+  <title>California Housing Price Predictor</title>
 
   <!-- 站点样式 -->
   <link rel="stylesheet" href="assets/css/style.css" />
@@ -11,31 +11,36 @@
 <body>
 <div class="nav-wrap">
   <nav class="nav">
-    <div class="brand">California Housing</div>
-    <a href="index.html"     class="active">Home</a>
-    <a href="map.html">Interactive Map & Statistics</a>
-    <a href="predictor.html">Housing Price Prediction Tool</a>
+    <div class="brand">
+      <svg class="brand-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 21V9L12 2L21 9V21H14V14H10V21H3Z" stroke="#4A90E2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 10L12 6L16 10" stroke="#4A90E2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>CalHousing</span>
+    </div>
+    <a href="index.html" class="active">Home</a>
+    <a href="map.html">Housing Map Statistics</a>
+    <a href="airbnb-map.html">Airbnb Map Statistics</a>
+    <a href="predictor.html">Housing Price Prediction</a>
     <a href="trends.html">Housing Trends Dashboard</a>
   </nav>
 </div>
 
-  <main class="container">
-  <section class="card">
-    <h1>California Housing Dashboard</h1>
-    <p class="caption">Explore county-level housing & Airbnb signals. Use the tabs above to navigate.</p>
-  </section>
-
-  <!-- 放一个“入口卡片” -->
-  <section class="card">
-    <h2>Start here</h2>
-    <p>Try the interactive map, run the (placeholder) price predictor, or view trends.</p>
-    <div style="display:flex; gap:12px; flex-wrap:wrap">
-      <a class="nav-btn" href="map.html"><button>Open Map</button></a>
-      <a class="nav-btn" href="predictor.html"><button>Price Predictor</button></a>
-      <a class="nav-btn" href="trends.html"><button>Trends</button></a>
+  <main class="hero-container">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">California Housing Price Predictor</h1>
+        <p class="hero-description">Leveraging machine learning to provide accurate, up-to-date housing price predictions across the Golden State. Make informed decisions with our powerful data-driven tools.</p>
+        <div class="hero-buttons">
+          <a href="predictor.html" class="btn btn-primary">Get Started</a>
+          <a href="trends.html" class="btn btn-secondary">Learn More</a>
+        </div>
+      </div>
+      <div class="hero-illustration">
+        <img src="assets/images/house-illustration.png" alt="California Housing Illustration" class="illustration">
+      </div>
     </div>
-  </section>
-</main>
+  </main>
 
 <div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
 
