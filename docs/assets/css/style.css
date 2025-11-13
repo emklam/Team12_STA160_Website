@@ -9,11 +9,6 @@ pre { background: #0b1021; color: #e2e8f0; padding: 12px; border-radius: 8px; ov
 .control-row { display: flex; align-items: center; gap: 10px; margin: 8px 0 12px; }
 .map { height: 520px; border: 1px dashed #d0d7de; border-radius: 8px; }
 .caption { color: #6b7280; margin: 8px 0 0; }
-#导航
-.nav {display:flex;gap:16px;align-items:center;padding:14px 20px;border-bottom:1px solid #eee;}
-.nav a {text-decoration:none;color:#111;padding:6px 10px;border-radius:8px}
-.nav a.active {background:#111;color:#fff}
-.container{max-width:1100px;margin:32px auto;padding:0 16px}
 
 /* ========= 基础主题变量 ========= */
 :root{
@@ -61,40 +56,60 @@ p.caption, .caption{color:var(--muted); font-size:13px}
 }
 
 /* ========= 顶部导航 ========= */
-.nav-wrap{background:var(--panel); border-bottom:1px solid var(--line)}
+.nav-wrap{
+  background:var(--panel); 
+  border-bottom:1px solid var(--line);
+  position: relative;
+  z-index: 100;
+}
 .nav{
-  display:flex; align-items:center; gap:10px;
-  max-width:1100px; margin:0 auto; padding:14px 20px;
+  display:flex; 
+  align-items:center; 
+  gap:10px;
+  max-width:1100px; 
+  margin:0 auto; 
+  padding:14px 20px;
   flex-wrap: nowrap;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
+  width: 100%;
+  box-sizing: border-box;
 }
 .nav::-webkit-scrollbar {
   display: none;
 }
 .brand{
-  font-weight:700; letter-spacing:.2px; margin-right:auto;
+  font-weight:700; 
+  letter-spacing:.2px; 
+  margin-right:auto;
   display: flex;
   align-items: center;
   gap: 8px;
   color: #111;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 .brand-icon {
   flex-shrink: 0;
 }
 .nav a{
-  text-decoration:none; color:var(--brand-weak);
-  padding:8px 10px; border-radius:10px;
+  text-decoration:none; 
+  color:var(--brand-weak);
+  padding:8px 10px; 
+  border-radius:10px;
   transition: all 0.2s ease;
   white-space: nowrap;
   flex-shrink: 0;
   font-size: 14px;
+  display: inline-block;
 }
-.nav a:hover{ background:rgba(125,125,125,.08); color:var(--brand) }
+.nav a:hover{ 
+  background:rgba(125,125,125,.08); 
+  color:var(--brand);
+}
 .nav a.active{ 
-  background:#4A90E2; 
-  color:#fff; 
+  background:#4A90E2 !important; 
+  color:#fff !important; 
   border-radius:8px;
   font-weight:500;
 }
