@@ -129,7 +129,7 @@ async function buildChoropleth() {
   applyColor(isHousing ? "housing" : "airbnb");
 }
 
-// ================= 上色：蓝色 / 橙色 =================
+// ================= color =================
 function applyColor(mode) {
 
   function blueScale(v) {   // Housing
@@ -143,16 +143,20 @@ function applyColor(mode) {
     ];
   }
 
-  function orangeScale(v) { // Airbnb
-    const t = Math.max(0, Math.min(1, v));
-    const light = [255,225,180];
-    const dark  = [200,120,  0];
-    return [
-      Math.round(light[0] + (dark[0]-light[0])*t),
-      Math.round(light[1] + (dark[1]-light[1])*t),
-      Math.round(light[2] + (dark[2]-light[2])*t)
-    ];
-  }
+  function orangeScale(v) {
+  const t = Math.max(0, Math.min(1, v));
+
+  // Airbnb color
+  const light = [255, 236, 236]; // #FFECEC
+  const dark  = [255,  90,  95]; // #FF5A5F (Airbnb Red)
+
+  return [
+    Math.round(light[0] + (dark[0] - light[0]) * t),
+    Math.round(light[1] + (dark[1] - light[1]) * t),
+    Math.round(light[2] + (dark[2] - light[2]) * t)
+  ];
+}
+
 
   countiesGeo.features.forEach(f=>{
     const p = f.properties || {};
@@ -177,11 +181,20 @@ function applyColor(mode) {
     p.shade_g = rgb[1];
     p.shade_b = rgb[2];
 
-    // Tooltip 美化
-    p.__tooltip =
-      `County: ${name}\n` +
-      `Median housing: ${fmtMoney(h)}\n` +
-      `Median Airbnb: ${fmtMoney(a)}`;
+
+    // Tooltip
+if (mode === "housing") {
+  // Housing page → housing median
+  p.__tooltip =
+    `County: ${name}\n` +
+    `Median housing: ${fmtMoney(h)}`;
+} else {
+  // Airbnb page →  airbnb median
+  p.__tooltip =
+    `County: ${name}\n` +
+    `Median Airbnb: ${fmtMoney(a)}`;
+}
+
   });
 
   if (map?.getSource("counties")) {
@@ -234,7 +247,7 @@ function initMap() {
   });
 }
 
-// ================= 启动 =================
+// ================= start =================
 buildChoropleth().catch(err=>{
   console.error(err);
   const legend = document.getElementById("legend");
