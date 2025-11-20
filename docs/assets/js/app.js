@@ -1,6 +1,6 @@
 
-// ============ 工具函数 ============
-// 模糊找列名（不区分大小写，包含匹配）
+// technical function
+// 模糊找列名
 function findCol(cols, candidates) {
   const low = {};
   cols.forEach(c => low[c.toLowerCase()] = c);
@@ -209,7 +209,7 @@ function initMap() {
       }
     });
 
-    // 简单的 hover tooltip
+    // hover tooltip
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
     map.on('mousemove', 'counties-fill', (e) => {
       const f = e.features && e.features[0];
