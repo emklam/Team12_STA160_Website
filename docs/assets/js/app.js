@@ -186,17 +186,22 @@ function applyColor(mode) {
 
 
     // Tooltip
-    if (mode === "housing") {
-      // Housing page →  housing median
-      p.__tooltip =
-        `County: ${name}\n` +
-        `Median housing price: ${fmtMoney(h)}`;
-    } else {
-      // Airbnb page →  airbnb median
-      p.__tooltip =
-        `County: ${name}\n` +
-        `Median Airbnb price: ${fmtMoney(a)}`;
-    }
+ (mode === "housing") {
+  // Housing page → housing median
+  p.__tooltipHTML =
+    `<div>
+       <strong>County:</strong> ${name}<br>
+       <span>Median housing price: ${fmtMoney(h)}</span>
+     </div>`;
+} else {
+  // Airbnb page → airbnb median
+  p.__tooltipHTML =
+    `<div>
+       <strong>County:</strong> ${name}<br>
+       <span>Median Airbnb price: ${fmtMoney(a)}</span>
+     </div>`;
+}
+
 
 
   });
@@ -241,11 +246,14 @@ function initMap() {
     // Tooltip
     const popup = new maplibregl.Popup({ closeButton:false, closeOnClick:false });
 
-    map.on("mousemove", "counties-fill", e=>{
-      const f = e.features?.[0];
-      if (!f) return;
-      popup.setLngLat(e.lngLat).setText(f.properties.__tooltip).addTo(map);
-    });
+    map.on("mousemove", "counties-fill", e => {
+  const f = e.features?.[0];
+  if (!f) return;
+
+  const html = f.properties.__tooltipHTML || f.properties.__tooltip || "";
+  popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
+});
+
 
     map.on("mouseleave", "counties-fill", ()=>popup.remove());
   });
