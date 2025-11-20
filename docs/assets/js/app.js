@@ -2,50 +2,54 @@
 
 // 千分位 + $ 格式化
 function fmtMoney(x) {
-  if (!Number.isFinite(x)) return 'N/A';
-  return '$' + x.toLocaleString();
+  if (!Number.isFinite(x)) return "N/A";
+  return "$" + x.toLocaleString();
 }
 
 // 不区分大小写：模糊匹配列名
 function findCol(cols, candidates) {
   const lower = {};
-  cols.forEach(c => lower[c.toLowerCase()] = c);
+  cols.forEach((c) => (lower[c.toLowerCase()] = c));
 
   for (const c of candidates) {
     if (lower[c.toLowerCase()]) return lower[c.toLowerCase()];
   }
   for (const c of cols) {
-    if (candidates.some(k => c.toLowerCase().includes(k.toLowerCase()))) return c;
+    if (candidates.some((k) => c.toLowerCase().includes(k.toLowerCase()))) return c;
   }
   return null;
 }
 
 function normCounty(s) {
-  if (!s) return '';
-  return String(s).replace(/county/i, '').trim().toLowerCase();
+  if (!s) return "";
+  return String(s).replace(/county/i, "").trim().toLowerCase();
 }
 
 function median(arr) {
-  const v = arr.filter(Number.isFinite).sort((a,b)=>a-b);
+  const v = arr.filter(Number.isFinite).sort((a, b) => a - b);
   if (!v.length) return NaN;
-  const i = Math.floor(v.length/2);
-  return v.length % 2 ? v[i] : (v[i-1]+v[i]) / 2;
+  const i = Math.floor(v.length / 2);
+  return v.length % 2 ? v[i] : (v[i - 1] + v[i]) / 2;
 }
 
 function minmax(arr) {
   const v = arr.filter(Number.isFinite);
-  if (!v.length) return arr.map(_=>0);
-  const mn = Math.min(...v), mx = Math.max(...v);
-  return arr.map(x => Number.isFinite(x) ? (x - mn)/(mx - mn) : 0);
+  if (!v.length) return arr.map(() => 0);
+  const mn = Math.min(...v),
+    mx = Math.max(...v);
+  if (mx === mn) return arr.map(() => 0);
+  return arr.map((x) => (Number.isFinite(x) ? (x - mn) / (mx - mn) : 0));
 }
 
 // ================= CSV 读取 =================
 async function loadCSV(url) {
   return new Promise((resolve, reject) => {
     Papa.parse(url, {
-      header: true, download: true, dynamicTyping: true,
-      complete: r => resolve(r.data),
-      error: reject
+      header: true,
+      download: true,
+      dynamicTyping: true,
+      complete: (r) => resolve(r.data),
+      error: reject,
     });
   });
 }
@@ -55,112 +59,102 @@ let map, countiesGeo, joinedTable;
 
 // ================= 主逻辑：构建地图 =================
 async function buildChoropleth() {
-
-   // Housing Map（map.html）or Airbnb Map（airbnb-map.html）?
   const path = location.pathname;
-  const isAirbnb  = path.includes("airbnb-map.html");
-  const isHousing = !isAirbnb && path.includes("map.html");
+  const isHousing = path.includes("map.html") && !path.includes("airbnb-map");
+  const isAirbnb = path.includes("airbnb-map.html");
 
-  if (!isHousing && !isAirbnb) return;  // if not map, then quit
+  if (!isHousing && !isAirbnb) return; // 不是这两个页面就退出
 
-
-  // 加载数据
   const [housing, airbnb, counties] = await Promise.all([
     loadCSV("data/housingvars.csv"),
     loadCSV("data/airbnbvars.csv"),
-    fetch("data/ca_counties.geojson").then(r=>r.json())
+    fetch("data/ca_counties.geojson").then((r) => r.json()),
   ]);
 
   countiesGeo = counties;
 
-  // 自动找列
+  // find column auto
   const hCols = Object.keys(housing[0] || {});
   const aCols = Object.keys(airbnb[0] || {});
 
   const county_h = findCol(hCols, ["county"]);
   const county_a = findCol(aCols, ["county"]);
-  const price_h  = findCol(hCols, ["price", "median_price"]);
-  const price_a  = findCol(aCols, ["price", "nightly", "airbnb"]);
+  const price_h = findCol(hCols, ["price", "median_price"]);
+  const price_a = findCol(aCols, ["price", "nightly", "airbnb"]);
 
   // 预处理 county
-  housing.forEach(r => r.__county = normCounty(r[county_h]));
-  airbnb.forEach(r => r.__county = normCounty(r[county_a]));
+  housing.forEach((r) => (r.__county = normCounty(r[county_h])));
+  airbnb.forEach((r) => (r.__county = normCounty(r[county_a])));
 
-  // 聚合
+  // median
   const hBy = new Map();
-  housing.forEach(r=>{
-    const k=r.__county,v=r[price_h];
-    if(!k||!Number.isFinite(v))return;
-    if(!hBy.has(k))hBy.set(k,[]);
+  housing.forEach((r) => {
+    const k = r.__county,
+      v = r[price_h];
+    if (!k || !Number.isFinite(v)) return;
+    if (!hBy.has(k)) hBy.set(k, []);
     hBy.get(k).push(v);
   });
 
   const aBy = new Map();
-  airbnb.forEach(r=>{
-    const k=r.__county,v=r[price_a];
-    if(!k||!Number.isFinite(v))return;
-    if(!aBy.has(k))aBy.set(k,[]);
+  airbnb.forEach((r) => {
+    const k = r.__county,
+      v = r[price_a];
+    if (!k || !Number.isFinite(v)) return;
+    if (!aBy.has(k)) aBy.set(k, []);
     aBy.get(k).push(v);
   });
 
   const countiesSet = new Set([...hBy.keys(), ...aBy.keys()]);
   const rows = [];
 
-  countiesSet.forEach(k=>{
+  countiesSet.forEach((k) => {
     rows.push({
       __county: k,
-      housing_med: median(hBy.get(k)||[]),
-      airbnb_med:  median(aBy.get(k)||[])
+      housing_med: median(hBy.get(k) || []),
+      airbnb_med: median(aBy.get(k) || []),
     });
   });
 
   // 归一化
-  const hn = minmax(rows.map(r=>r.housing_med));
-  const an = minmax(rows.map(r=>r.airbnb_med));
-
-  rows.forEach((r,i)=>{
+  const hn = minmax(rows.map((r) => r.housing_med));
+  const an = minmax(rows.map((r) => r.airbnb_med));
+  rows.forEach((r, i) => {
     r.h_norm = hn[i];
     r.a_norm = an[i];
   });
 
-  joinedTable = new Map(rows.map(r=>[r.__county,r]));
+  joinedTable = new Map(rows.map((r) => [r.__county, r]));
 
   initMap();
-
-  // Housing 显示 housing 数据，Airbnb 显示 airbnb 数据
   applyColor(isHousing ? "housing" : "airbnb");
 }
 
 // ================= color =================
 function applyColor(mode) {
-
-  function blueScale(v) {   // Housing
+  function blueScale(v) {
     const t = Math.max(0, Math.min(1, v));
-    const light = [198,220,255];
-    const dark  = [ 15, 60,150];
+    const light = [198, 220, 255];
+    const dark = [15, 60, 150];
     return [
-      Math.round(light[0] + (dark[0]-light[0])*t),
-      Math.round(light[1] + (dark[1]-light[1])*t),
-      Math.round(light[2] + (dark[2]-light[2])*t)
+      Math.round(light[0] + (dark[0] - light[0]) * t),
+      Math.round(light[1] + (dark[1] - light[1]) * t),
+      Math.round(light[2] + (dark[2] - light[2]) * t),
     ];
   }
 
   function orangeScale(v) {
-  const t = Math.max(0, Math.min(1, v));
+    const t = Math.max(0, Math.min(1, v));
+    const light = [255, 236, 236]; // #FFECEC
+    const dark = [255, 90, 95]; // #FF5A5F
+    return [
+      Math.round(light[0] + (dark[0] - light[0]) * t),
+      Math.round(light[1] + (dark[1] - light[1]) * t),
+      Math.round(light[2] + (dark[2] - light[2]) * t),
+    ];
+  }
 
-  // Airbnb color
-  const light = [255, 236, 236]; // #FFECEC
-  const dark  = [255,  90,  95]; // #FF5A5F (Airbnb Red)
-
-  return [
-    Math.round(light[0] + (dark[0] - light[0]) * t),
-    Math.round(light[1] + (dark[1] - light[1]) * t),
-    Math.round(light[2] + (dark[2] - light[2]) * t)
-  ];
-}
-
-
-  countiesGeo.features.forEach(f=>{
+  countiesGeo.features.forEach((f) => {
     const p = f.properties || {};
     const name = p.CountyName || p.NAME || p.name || "";
     const key = normCounty(name);
@@ -170,7 +164,6 @@ function applyColor(mode) {
     const a = row?.airbnb_med;
 
     let valueNorm, rgb;
-
     if (mode === "housing") {
       valueNorm = row?.h_norm ?? 0;
       rgb = blueScale(valueNorm);
@@ -183,27 +176,12 @@ function applyColor(mode) {
     p.shade_g = rgb[1];
     p.shade_b = rgb[2];
 
-
-
     // Tooltip
- (mode === "housing") {
-  // Housing page → housing median
-  p.__tooltipHTML =
-    `<div>
-       <strong>County:</strong> ${name}<br>
-       <span>Median housing price: ${fmtMoney(h)}</span>
-     </div>`;
-} else {
-  // Airbnb page → airbnb median
-  p.__tooltipHTML =
-    `<div>
-       <strong>County:</strong> ${name}<br>
-       <span>Median Airbnb price: ${fmtMoney(a)}</span>
-     </div>`;
-}
-
-
-
+    if (mode === "housing") {
+      p.__tooltip = `County: ${name}\nMedian housing price: ${fmtMoney(h)}`;
+    } else {
+      p.__tooltip = `County: ${name}\nMedian Airbnb price: ${fmtMoney(a)}`;
+    }
   });
 
   if (map?.getSource("counties")) {
@@ -219,13 +197,13 @@ function initMap() {
     container: "map",
     style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
     center: [-119.5, 36.5],
-    zoom: 5.1
+    zoom: 5.1,
   });
 
   map.addControl(new maplibregl.NavigationControl());
 
-  map.on("load", ()=>{
-    map.addSource("counties", { type:"geojson", data: countiesGeo });
+  map.on("load", () => {
+    map.addSource("counties", { type: "geojson", data: countiesGeo });
 
     map.addLayer({
       id: "counties-fill",
@@ -234,36 +212,34 @@ function initMap() {
       paint: {
         "fill-color": [
           "rgba",
-          ["get","shade_r"],
-          ["get","shade_g"],
-          ["get","shade_b"],
-          0.78
+          ["get", "shade_r"],
+          ["get", "shade_g"],
+          ["get", "shade_b"],
+          0.78,
         ],
-        "fill-outline-color": "#888"
-      }
+        "fill-outline-color": "#888",
+      },
     });
 
-    // Tooltip
-    const popup = new maplibregl.Popup({ closeButton:false, closeOnClick:false });
+    const popup = new maplibregl.Popup({
+      closeButton: false,
+      closeOnClick: false,
+    });
 
-    map.on("mousemove", "counties-fill", e => {
-  const f = e.features?.[0];
-  if (!f) return;
+    map.on("mousemove", "counties-fill", (e) => {
+      const f = e.features && e.features[0];
+      if (!f) return;
+      const tip = f.properties && f.properties.__tooltip;
+      popup.setLngLat(e.lngLat).setText(tip || "").addTo(map);
+    });
 
-  const html = f.properties.__tooltipHTML || f.properties.__tooltip || "";
-  popup.setLngLat(e.lngLat).setHTML(html).addTo(map);
-});
-
-
-    map.on("mouseleave", "counties-fill", ()=>popup.remove());
+    map.on("mouseleave", "counties-fill", () => popup.remove());
   });
 }
 
 // ================= start =================
-buildChoropleth().catch(err=>{
+buildChoropleth().catch((err) => {
   console.error(err);
   const legend = document.getElementById("legend");
   if (legend) legend.textContent = String(err);
 });
-
-
