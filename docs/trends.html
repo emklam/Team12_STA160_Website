@@ -402,11 +402,11 @@
   let filteredHousingData = [];
   let filteredAirbnbData = [];
   
-  // Housing counties filter
-  const housingCounties = ['Los Angeles', 'San Diego', 'San Francisco', 'Sacramento', 'Fresno', 'Santa Clara', 'Alameda'];
+  // Housing counties filter - only consider these 7 counties
+  const housingCounties = ['Los Angeles', 'Fresno', 'San Diego', 'Sacramento', 'San Francisco', 'Santa Clara', 'Alameda'];
   
-  // Airbnb counties filter
-  const airbnbCounties = ['Los Angeles', 'San Diego', 'San Francisco', 'Oakland', 'Pacific Grove', 'San Mateo'];
+  // Airbnb counties filter - only consider these 7 counties
+  const airbnbCounties = ['Los Angeles', 'San Diego', 'Santa Clara', 'San Mateo', 'Alameda', 'Santa Cruz', 'Monterey'];
   
   // Chart instances
   const charts = {};
@@ -540,9 +540,10 @@
           neighborhood: (row.neighborhood || '').trim(),
           city: (row.city || '').trim()
         })).filter(d => {
-          // Filter out prices that are too high (likely housing prices mixed in)
-          // Airbnb prices are typically under $10,000 per night (very rare to exceed this)
-          return d.price > 0 && d.price < 10000 && d.county;
+          // Filter out prices that are too high (likely outliers or errors)
+          // Most Airbnb prices are under $2,000 per night
+          // Setting max to $3,000 to be safe but filter extreme outliers
+          return d.price > 0 && d.price <= 3000 && d.county;
         });
         
         console.log('Filtered Airbnb data:', airbnbData.length, 'rows');
@@ -710,9 +711,10 @@
   
   function updateCountyFilter() {
     const countyFilter = document.getElementById('countyFilter');
+    // Use the union of all specified counties from both datasets
     const allCounties = [...new Set([
-      ...housingData.map(d => d.county),
-      ...airbnbData.map(d => d.county)
+      ...housingCounties,
+      ...airbnbCounties
     ])].filter(c => c).sort();
     
     // Clear existing options except "All"
@@ -959,7 +961,7 @@
       }]
     });
     
-    // Price by County (Bar)
+    // Price by County (Bar) - show all specified housing counties
     const priceByCountyEl = document.getElementById('priceByCounty');
     if (!priceByCountyEl) return;
     if (!charts.priceByCounty) {
@@ -972,15 +974,44 @@
       }
       housingBarCountyPrices[d.county].push(d.price);
     });
-    const avgByCounty = Object.entries(housingBarCountyPrices).map(([county, prices]) => ({
-      county,
-      avg: prices.reduce((a, b) => a + b, 0) / prices.length
-    })).sort((a, b) => b.avg - a.avg);
+    
+    // Calculate overall average across all counties with data
+    const allHousingPrices = filteredHousingData.map(d => d.price);
+    const overallHousingAvg = allHousingPrices.length > 0 
+      ? allHousingPrices.reduce((a, b) => a + b, 0) / allHousingPrices.length 
+      : 0;
+    
+    // Create data for all specified housing counties (show 0 if no data)
+    const avgByCounty = housingCounties.map(county => {
+      const prices = housingBarCountyPrices[county] || [];
+      return {
+        county,
+        avg: prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0,
+        count: prices.length
+      };
+    }).sort((a, b) => {
+      // Sort by average price (descending), but put counties with 0 data at the end
+      if (a.count === 0 && b.count > 0) return 1;
+      if (b.count === 0 && a.count > 0) return -1;
+      return b.avg - a.avg;
+    });
+    
     charts.priceByCounty.setOption({
       tooltip: { 
         trigger: 'axis',
         formatter: function(params) {
-          return params[0].name + '<br/>Avg Price: ' + formatCurrency(params[0].value);
+          const countyName = params[0].name;
+          const countyData = avgByCounty.find(d => d.county === countyName);
+          const hasData = countyData && countyData.count > 0;
+          let tooltip = countyName + '<br/>';
+          if (hasData) {
+            tooltip += 'Avg Price: ' + formatCurrency(params[0].value) + '<br/>';
+            tooltip += 'Listings: ' + countyData.count + '<br/>';
+          } else {
+            tooltip += 'No data<br/>';
+          }
+          tooltip += 'Overall Avg (all counties): ' + formatCurrency(overallHousingAvg);
+          return tooltip;
         }
       },
       xAxis: {
@@ -997,11 +1028,35 @@
           }
         }
       },
-      series: [{
-        type: 'bar',
-        data: avgByCounty.map(d => Math.round(d.avg)),
-        itemStyle: { color: '#4A90E2' }
-      }]
+      series: [
+        {
+          type: 'bar',
+          name: 'County Average',
+          data: avgByCounty.map(d => Math.round(d.avg)),
+          itemStyle: { 
+            color: function(params) {
+              // Different color for counties with no data
+              const countyData = avgByCounty[params.dataIndex];
+              return countyData.count === 0 ? '#d1d5db' : '#4A90E2';
+            }
+          }
+        },
+        {
+          type: 'line',
+          name: 'Overall Average',
+          data: avgByCounty.map(() => Math.round(overallHousingAvg)),
+          itemStyle: { color: '#ef4444' },
+          lineStyle: { width: 2, type: 'dashed' },
+          symbol: 'none',
+          label: {
+            show: false
+          }
+        }
+      ],
+      legend: {
+        data: ['County Average', 'Overall Average'],
+        bottom: 0
+      }
     });
     
     // Price vs Crime Rate
@@ -1199,12 +1254,14 @@
       }]
     });
     
-    // Price by County
+    // Price by County - show all specified counties and calculate overall average
     const airbnbPriceByCountyEl = document.getElementById('airbnbPriceByCounty');
     if (!airbnbPriceByCountyEl) return;
     if (!charts.airbnbPriceByCounty) {
       charts.airbnbPriceByCounty = echarts.init(airbnbPriceByCountyEl);
     }
+    
+    // Calculate average for each county
     const airbnbBarCountyPrices = {};
     filteredAirbnbData.forEach(d => {
       if (!airbnbBarCountyPrices[d.county]) {
@@ -1212,15 +1269,44 @@
       }
       airbnbBarCountyPrices[d.county].push(d.price);
     });
-    const avgByCounty = Object.entries(airbnbBarCountyPrices).map(([county, prices]) => ({
-      county,
-      avg: prices.reduce((a, b) => a + b, 0) / prices.length
-    })).sort((a, b) => b.avg - a.avg);
+    
+    // Calculate overall average across all counties with data
+    const allPrices = filteredAirbnbData.map(d => d.price);
+    const overallAvg = allPrices.length > 0 
+      ? allPrices.reduce((a, b) => a + b, 0) / allPrices.length 
+      : 0;
+    
+    // Create data for all 8 counties (show 0 if no data)
+    const avgByCounty = airbnbCounties.map(county => {
+      const prices = airbnbBarCountyPrices[county] || [];
+      return {
+        county,
+        avg: prices.length > 0 ? prices.reduce((a, b) => a + b, 0) / prices.length : 0,
+        count: prices.length
+      };
+    }).sort((a, b) => {
+      // Sort by average price (descending), but put counties with 0 data at the end
+      if (a.count === 0 && b.count > 0) return 1;
+      if (b.count === 0 && a.count > 0) return -1;
+      return b.avg - a.avg;
+    });
+    
     charts.airbnbPriceByCounty.setOption({
       tooltip: { 
         trigger: 'axis',
         formatter: function(params) {
-          return params[0].name + '<br/>Avg Price: ' + formatCurrency(params[0].value);
+          const countyName = params[0].name;
+          const countyData = avgByCounty.find(d => d.county === countyName);
+          const hasData = countyData && countyData.count > 0;
+          let tooltip = countyName + '<br/>';
+          if (hasData) {
+            tooltip += 'Avg Price: ' + formatCurrency(params[0].value) + '<br/>';
+            tooltip += 'Listings: ' + countyData.count + '<br/>';
+          } else {
+            tooltip += 'No data<br/>';
+          }
+          tooltip += 'Overall Avg (all counties): ' + formatCurrency(overallAvg);
+          return tooltip;
         }
       },
       xAxis: {
@@ -1237,11 +1323,35 @@
           }
         }
       },
-      series: [{
-        type: 'bar',
-        data: avgByCounty.map(d => Math.round(d.avg)),
-        itemStyle: { color: '#4A90E2' }
-      }]
+      series: [
+        {
+          type: 'bar',
+          name: 'County Average',
+          data: avgByCounty.map(d => Math.round(d.avg)),
+          itemStyle: { 
+            color: function(params) {
+              // Different color for counties with no data
+              const countyData = avgByCounty[params.dataIndex];
+              return countyData.count === 0 ? '#d1d5db' : '#4A90E2';
+            }
+          }
+        },
+        {
+          type: 'line',
+          name: 'Overall Average',
+          data: avgByCounty.map(() => Math.round(overallAvg)),
+          itemStyle: { color: '#ef4444' },
+          lineStyle: { width: 2, type: 'dashed' },
+          symbol: 'none',
+          label: {
+            show: false
+          }
+        }
+      ],
+      legend: {
+        data: ['County Average', 'Overall Average'],
+        bottom: 0
+      }
     });
     
     // Price vs Bedrooms
