@@ -277,7 +277,7 @@
       <div class="filter-group price-range-group">
         <label>Price Range ($)</label>
         <input type="range" id="priceRange" min="0" max="5000000" step="50000" value="5000000">
-        <span id="priceRangeValue">$0 - $5,000,000</span>
+        <span id="priceRangeValue">$0 - 5M</span>
       </div>
       <div class="filter-group">
         <label>Bedrooms</label>
@@ -411,6 +411,30 @@
   // Chart instances
   const charts = {};
   
+  // Number formatting function - shorten long numbers
+  function formatNumber(num) {
+    if (num === null || num === undefined || isNaN(num)) return '0';
+    const absNum = Math.abs(num);
+    if (absNum >= 1000000) {
+      return (num / 1000000).toFixed(1) + 'M';
+    } else if (absNum >= 1000) {
+      return (num / 1000).toFixed(0) + 'k';
+    }
+    return Math.round(num).toString();
+  }
+  
+  // Format number with currency
+  function formatCurrency(num) {
+    if (num === null || num === undefined || isNaN(num)) return '$0';
+    const absNum = Math.abs(num);
+    if (absNum >= 1000000) {
+      return '$' + (num / 1000000).toFixed(1) + 'M';
+    } else if (absNum >= 1000) {
+      return '$' + (num / 1000).toFixed(0) + 'k';
+    }
+    return '$' + Math.round(num).toString();
+  }
+  
   // Initialize
   document.addEventListener('DOMContentLoaded', function() {
     loadData();
@@ -423,7 +447,7 @@
     const priceRangeValue = document.getElementById('priceRangeValue');
     priceRange.addEventListener('input', function() {
       const max = parseInt(this.value);
-      priceRangeValue.textContent = `$0 - $${max.toLocaleString()}`;
+      priceRangeValue.textContent = `$0 - ${formatCurrency(max)}`;
       applyFilters();
     });
     
@@ -486,7 +510,7 @@
       }
     });
     
-    // Load Airbnb data
+    // Load Airbnb data - explicitly use only airbnbvars.csv columns
     Papa.parse('data/airbnbvars.csv', {
       download: true,
       header: true,
@@ -495,23 +519,39 @@
       complete: function(results) {
         console.log('Airbnb CSV loaded, rows:', results.data.length);
         console.log('Sample row:', results.data[0]);
+        console.log('Airbnb CSV columns:', Object.keys(results.data[0] || {}));
         
+        // Explicitly map only airbnbvars.csv columns (all lowercase in the CSV)
         airbnbData = results.data.filter(row => {
-          const county = (row.county || row.County || '').trim();
-          const price = row.price || row.Price || '';
-          return airbnbCounties.includes(county) && price && !isNaN(parseFloat(price));
+          // Only use 'county' column from airbnbvars.csv (not 'County')
+          const county = (row.county || '').trim();
+          // Only use 'price' column from airbnbvars.csv (not 'Price')
+          const airbnbPrice = row.price || '';
+          return airbnbCounties.includes(county) && airbnbPrice && !isNaN(parseFloat(airbnbPrice));
         }).map(row => ({
-          price: parseFloat(row.price || row.Price || 0) || 0,
-          roomType: (row.room_type || row.roomType || '').trim(),
-          bathrooms: parseFloat(row.bathrooms || row.Bathrooms || 0) || 0,
-          bedrooms: parseFloat(row.bedrooms || row.Bedrooms || 0) || 0,
-          reviewScores: parseFloat(row.review_scores_location || row.reviewScores || 0) || 0,
-          county: (row.county || row.County || '').trim(),
-          neighborhood: (row.neighborhood || row.Neighborhood || '').trim()
-        })).filter(d => d.price > 0 && d.county);
+          // Explicitly use airbnbvars.csv column names (all lowercase)
+          price: parseFloat(row.price || 0) || 0,
+          roomType: (row.room_type || '').trim(),
+          bathrooms: parseFloat(row.bathrooms || 0) || 0,
+          bedrooms: parseFloat(row.bedrooms || 0) || 0,
+          beds: parseFloat(row.beds || 0) || 0,
+          reviewScores: parseFloat(row.review_scores_location || 0) || 0,
+          county: (row.county || '').trim(),
+          neighborhood: (row.neighborhood || '').trim(),
+          city: (row.city || '').trim()
+        })).filter(d => {
+          // Filter out prices that are too high (likely housing prices mixed in)
+          // Airbnb prices are typically under $10,000 per night (very rare to exceed this)
+          return d.price > 0 && d.price < 10000 && d.county;
+        });
         
         console.log('Filtered Airbnb data:', airbnbData.length, 'rows');
         console.log('Sample Airbnb data:', airbnbData[0]);
+        console.log('Airbnb price range:', {
+          min: Math.min(...airbnbData.map(d => d.price)),
+          max: Math.max(...airbnbData.map(d => d.price)),
+          avg: airbnbData.reduce((sum, d) => sum + d.price, 0) / airbnbData.length
+        });
         
         filteredAirbnbData = [...airbnbData];
         updateCountyFilter();
@@ -569,7 +609,9 @@
     charts.housingMap.setOption({
       tooltip: {
         trigger: 'item',
-        formatter: '{b}<br/>Avg Price: ${c}'
+        formatter: function(params) {
+          return params.name + '<br/>Avg Price: ' + formatCurrency(params.value);
+        }
       },
       visualMap: {
         min: Math.min(...Object.values(avgByCounty)),
@@ -633,7 +675,9 @@
     charts.airbnbMap.setOption({
       tooltip: {
         trigger: 'item',
-        formatter: '{b}<br/>Avg Price: ${c}'
+        formatter: function(params) {
+          return params.name + '<br/>Avg Price: ' + formatCurrency(params.value);
+        }
       },
       visualMap: {
         min: Math.min(...Object.values(avgByCounty).filter(v => v > 0)),
@@ -725,7 +769,7 @@
     if (filteredHousingData.length > 0) {
       const prices = filteredHousingData.map(d => d.price).sort((a, b) => a - b);
       const median = prices[Math.floor(prices.length / 2)];
-      document.getElementById('medianPrice').textContent = `$${Math.round(median).toLocaleString()}`;
+      document.getElementById('medianPrice').textContent = formatCurrency(median);
       
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
       const change = ((median - avg) / avg * 100).toFixed(1);
@@ -736,21 +780,21 @@
     if (filteredHousingData.length > 0) {
       const sizes = filteredHousingData.map(d => d.livingSpace).filter(s => s > 0);
       const avgSize = sizes.reduce((a, b) => a + b, 0) / sizes.length;
-      document.getElementById('avgSize').textContent = `${Math.round(avgSize).toLocaleString()} sq ft`;
+      document.getElementById('avgSize').textContent = `${formatNumber(avgSize)} sq ft`;
       document.getElementById('sizeChange').textContent = `${sizes.length} listings`;
     }
     
-    // Average Airbnb Price
+    // Average Airbnb Price (using only airbnbvars.csv data)
     if (filteredAirbnbData.length > 0) {
       const prices = filteredAirbnbData.map(d => d.price);
       const avg = prices.reduce((a, b) => a + b, 0) / prices.length;
-      document.getElementById('avgAirbnbPrice').textContent = `$${Math.round(avg).toLocaleString()}`;
+      document.getElementById('avgAirbnbPrice').textContent = formatCurrency(avg);
       document.getElementById('airbnbPriceChange').textContent = `${prices.length} listings`;
     }
     
     // Total Listings
     const total = filteredHousingData.length + filteredAirbnbData.length;
-    document.getElementById('totalListings').textContent = total.toLocaleString();
+    document.getElementById('totalListings').textContent = formatNumber(total);
     document.getElementById('listingsChange').textContent = `${filteredHousingData.length} housing, ${filteredAirbnbData.length} Airbnb`;
   }
   
@@ -805,7 +849,7 @@
         trigger: 'axis',
         formatter: function(params) {
           return params[0].name + '<br/>' + 
-                 'Avg Price: $' + Math.round(params[0].value).toLocaleString() + '<br/>' +
+                 'Avg Price: ' + formatCurrency(params[0].value) + '<br/>' +
                  'Listings: ' + params[0].data.count;
         }
       },
@@ -814,7 +858,15 @@
         data: countyAverages.map(d => d.county),
         axisLabel: { rotate: 45 }
       },
-      yAxis: { type: 'value', name: 'Average Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Average Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'line',
         data: countyAverages.map(d => ({ value: Math.round(d.avgPrice), count: d.count })),
@@ -846,10 +898,16 @@
       histogram[bin]++;
     });
     charts.priceDistribution.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { 
+        trigger: 'axis',
+        formatter: function(params) {
+          return params[0].name + '<br/>Count: ' + params[0].value;
+        }
+      },
       xAxis: {
         type: 'category',
-        data: histogram.map((_, i) => Math.round(minPrice + i * binSize).toLocaleString())
+        data: histogram.map((_, i) => formatCurrency(Math.round(minPrice + i * binSize))),
+        axisLabel: { rotate: 45 }
       },
       yAxis: { type: 'value', name: 'Count' },
       series: [{
@@ -869,9 +927,30 @@
       .filter(d => d.livingSpace > 0 && d.price > 0)
       .map(d => [d.livingSpace, d.price]);
     charts.sizeVsPrice.setOption({
-      tooltip: { trigger: 'item' },
-      xAxis: { type: 'value', name: 'Living Space (sq ft)' },
-      yAxis: { type: 'value', name: 'Price ($)' },
+      tooltip: { 
+        trigger: 'item',
+        formatter: function(params) {
+          return 'Living Space: ' + formatNumber(params.value[0]) + ' sq ft<br/>Price: ' + formatCurrency(params.value[1]);
+        }
+      },
+      xAxis: { 
+        type: 'value', 
+        name: 'Living Space (sq ft)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatNumber(value);
+          }
+        }
+      },
+      yAxis: { 
+        type: 'value', 
+        name: 'Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'scatter',
         data: sizePriceData,
@@ -898,13 +977,26 @@
       avg: prices.reduce((a, b) => a + b, 0) / prices.length
     })).sort((a, b) => b.avg - a.avg);
     charts.priceByCounty.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { 
+        trigger: 'axis',
+        formatter: function(params) {
+          return params[0].name + '<br/>Avg Price: ' + formatCurrency(params[0].value);
+        }
+      },
       xAxis: {
         type: 'category',
         data: avgByCounty.map(d => d.county),
         axisLabel: { rotate: 45 }
       },
-      yAxis: { type: 'value', name: 'Avg Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Avg Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'bar',
         data: avgByCounty.map(d => Math.round(d.avg)),
@@ -922,9 +1014,22 @@
       .filter(d => d.crimeRate > 0 && d.price > 0)
       .map(d => [d.crimeRate, d.price]);
     charts.priceVsCrime.setOption({
-      tooltip: { trigger: 'item' },
+      tooltip: { 
+        trigger: 'item',
+        formatter: function(params) {
+          return 'Crime Rate: ' + params.value[0].toFixed(2) + '<br/>Price: ' + formatCurrency(params.value[1]);
+        }
+      },
       xAxis: { type: 'value', name: 'Crime Rate' },
-      yAxis: { type: 'value', name: 'Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'scatter',
         data: crimeData,
@@ -943,9 +1048,30 @@
       .filter(d => d.householdIncome > 0 && d.price > 0)
       .map(d => [d.householdIncome, d.price]);
     charts.priceVsIncome.setOption({
-      tooltip: { trigger: 'item' },
-      xAxis: { type: 'value', name: 'Household Income ($)' },
-      yAxis: { type: 'value', name: 'Price ($)' },
+      tooltip: { 
+        trigger: 'item',
+        formatter: function(params) {
+          return 'Household Income: ' + formatCurrency(params.value[0]) + '<br/>Price: ' + formatCurrency(params.value[1]);
+        }
+      },
+      xAxis: { 
+        type: 'value', 
+        name: 'Household Income ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
+      yAxis: { 
+        type: 'value', 
+        name: 'Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'scatter',
         data: incomeData,
@@ -980,9 +1106,22 @@
       avg: prices.reduce((a, b) => a + b, 0) / prices.length
     }));
     charts.airbnbRoomType.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { 
+        trigger: 'axis',
+        formatter: function(params) {
+          return params[0].name + '<br/>Avg Price: ' + formatCurrency(params[0].value);
+        }
+      },
       xAxis: { type: 'category', data: avgByRoomType.map(d => d.type) },
-      yAxis: { type: 'value', name: 'Avg Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Avg Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'bar',
         data: avgByRoomType.map(d => Math.round(d.avg)),
@@ -1007,10 +1146,16 @@
       histogram[bin]++;
     });
     charts.airbnbPriceDist.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { 
+        trigger: 'axis',
+        formatter: function(params) {
+          return params[0].name + '<br/>Count: ' + params[0].value;
+        }
+      },
       xAxis: {
         type: 'category',
-        data: histogram.map((_, i) => Math.round(minPrice + i * binSize))
+        data: histogram.map((_, i) => formatCurrency(Math.round(minPrice + i * binSize))),
+        axisLabel: { rotate: 45 }
       },
       yAxis: { type: 'value', name: 'Count' },
       series: [{
@@ -1030,9 +1175,22 @@
       .filter(d => d.reviewScores > 0 && d.price > 0)
       .map(d => [d.reviewScores, d.price]);
     charts.priceVsReviews.setOption({
-      tooltip: { trigger: 'item' },
+      tooltip: { 
+        trigger: 'item',
+        formatter: function(params) {
+          return 'Review Score: ' + params.value[0].toFixed(2) + '<br/>Price: ' + formatCurrency(params.value[1]);
+        }
+      },
       xAxis: { type: 'value', name: 'Review Score' },
-      yAxis: { type: 'value', name: 'Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'scatter',
         data: reviewData,
@@ -1059,13 +1217,26 @@
       avg: prices.reduce((a, b) => a + b, 0) / prices.length
     })).sort((a, b) => b.avg - a.avg);
     charts.airbnbPriceByCounty.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { 
+        trigger: 'axis',
+        formatter: function(params) {
+          return params[0].name + '<br/>Avg Price: ' + formatCurrency(params[0].value);
+        }
+      },
       xAxis: {
         type: 'category',
         data: avgByCounty.map(d => d.county),
         axisLabel: { rotate: 45 }
       },
-      yAxis: { type: 'value', name: 'Avg Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Avg Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'bar',
         data: avgByCounty.map(d => Math.round(d.avg)),
@@ -1092,9 +1263,22 @@
       avg: prices.reduce((a, b) => a + b, 0) / prices.length
     })).sort((a, b) => a.beds - b.beds);
     charts.airbnbBedrooms.setOption({
-      tooltip: { trigger: 'axis' },
+      tooltip: { 
+        trigger: 'axis',
+        formatter: function(params) {
+          return params[0].name + '<br/>Avg Price: ' + formatCurrency(params[0].value);
+        }
+      },
       xAxis: { type: 'category', data: avgByBedroom.map(d => d.beds + ' beds') },
-      yAxis: { type: 'value', name: 'Avg Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Avg Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'bar',
         data: avgByBedroom.map(d => Math.round(d.avg)),
@@ -1112,9 +1296,22 @@
       .filter(d => d.bathrooms > 0 && d.price > 0)
       .map(d => [d.bathrooms, d.price]);
     charts.airbnbBathrooms.setOption({
-      tooltip: { trigger: 'item' },
+      tooltip: { 
+        trigger: 'item',
+        formatter: function(params) {
+          return 'Bathrooms: ' + params.value[0] + '<br/>Price: ' + formatCurrency(params.value[1]);
+        }
+      },
       xAxis: { type: 'value', name: 'Bathrooms' },
-      yAxis: { type: 'value', name: 'Price ($)' },
+      yAxis: { 
+        type: 'value', 
+        name: 'Price ($)',
+        axisLabel: {
+          formatter: function(value) {
+            return formatCurrency(value);
+          }
+        }
+      },
       series: [{
         type: 'scatter',
         data: bathroomData,
