@@ -133,14 +133,12 @@ async function buildChoropleth() {
   applyWeight(parseFloat(document.getElementById('w_h')?.value || '0.7'));
 }
 
-// 根据滑条权重应用着色并刷新地图源数据
-function applyWeight(w_h) {
-  const w_a = 1 - w_h;
+// 现在只用 housing_med（房价中位数）来上色
+function applyWeight(_w_h_unused) {
 
-  // 给每个县计算 mock_pred，并投影到灰度 shade(40..230)
+  // v 在 [0,1] 内，映射到 [230(浅) -> 40(深)]
   function toShade(v) {
-    if (!Number.isFinite(v)) return 200;        // 缺失：浅灰
-    // v 本来在 [0,1]，映射到 [230(浅)->40(深)]
+    if (!Number.isFinite(v)) return 200; // 缺失：浅灰
     const shade = Math.round(230 - 190 * Math.max(0, Math.min(1, v)));
     return Math.max(40, Math.min(230, shade));
   }
@@ -154,29 +152,33 @@ function applyWeight(w_h) {
 
     const hmed = row?.housing_med;
     const amed = row?.airbnb_med;
-    const mock = row ? (w_h * row.h_norm + w_a * row.a_norm) : NaN;
+    // 用归一化后的 housing_med 作为 score（0–1）
+    const score = row ? row.h_norm : NaN;
 
     p.housing_med = Number.isFinite(hmed) ? hmed : null;
     p.airbnb_med  = Number.isFinite(amed) ? amed : null;
-    p.mock_pred   = Number.isFinite(mock) ? mock : null;
-    p.shade       = toShade(mock);
+    p.mock_pred   = null;        // 不再使用 mock_pred
+    p.shade       = toShade(score);
+
+    // tooltip：展示县名 + 两个中位数
     p.__tooltip   = [
       `County: ${nameRaw || 'Unknown'}`,
-      (Number.isFinite(hmed) ? `housing_med: ${hmed}` : null),
-      (Number.isFinite(amed) ? `airbnb_med: ${amed}` : null),
-      (Number.isFinite(mock) ? `mock_pred: ${mock.toFixed(2)}` : null),
+      (Number.isFinite(hmed) ? `Median housing price: ${hmed}` : null),
+      (Number.isFinite(amed) ? `Median Airbnb price: ${amed}` : null),
     ].filter(Boolean).join('\n');
   }
 
-  // 刷新地图
+  // represh map
   if (map?.getSource('counties')) {
     map.getSource('counties').setData(countiesGeo);
   }
 
-  const label = document.getElementById('w_h_label');
-  if (label) label.textContent = w_h.toFixed(2);
-  document.getElementById('legend').textContent =
-    `Legend: lighter → lower, darker → higher mock prediction. w_h=${w_h.toFixed(2)}, w_a=${w_a.toFixed(2)}`;
+  //  legend text
+  const legendEl = document.getElementById('legend');
+  if (legendEl) {
+    legendEl.textContent =
+      'Legend: lighter \u2192 lower median housing price, darker \u2192 higher median housing price.';
+  }
 }
 
 // 初始化 MapLibre
