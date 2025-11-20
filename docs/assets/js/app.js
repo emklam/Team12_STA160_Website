@@ -56,11 +56,13 @@ let map, countiesGeo, joinedTable;
 // ================= 主逻辑：构建地图 =================
 async function buildChoropleth() {
 
-  // 判断是 housing-map.html 还是 airbnb-map.html
-  const isHousing = location.pathname.includes("map.html");
-  const isAirbnb  = location.pathname.includes("airbnb-map.html");
+   // Housing Map（map.html）or Airbnb Map（airbnb-map.html）?
+  const path = location.pathname;
+  const isAirbnb  = path.includes("airbnb-map.html");
+  const isHousing = !isAirbnb && path.includes("map.html");
 
-  if (!isHousing && !isAirbnb) return;  // 不是地图页面就退出
+  if (!isHousing && !isAirbnb) return;  // if not map, then quit
+
 
   // 加载数据
   const [housing, airbnb, counties] = await Promise.all([
@@ -182,18 +184,20 @@ function applyColor(mode) {
     p.shade_b = rgb[2];
 
 
+
     // Tooltip
-if (mode === "housing") {
-  // Housing page → housing median
-  p.__tooltip =
-    `County: ${name}\n` +
-    `Median housing: ${fmtMoney(h)}`;
-} else {
-  // Airbnb page →  airbnb median
-  p.__tooltip =
-    `County: ${name}\n` +
-    `Median Airbnb: ${fmtMoney(a)}`;
-}
+    if (mode === "housing") {
+      // Housing page →  housing median
+      p.__tooltip =
+        `County: ${name}\n` +
+        `Median housing price: ${fmtMoney(h)}`;
+    } else {
+      // Airbnb page →  airbnb median
+      p.__tooltip =
+        `County: ${name}\n` +
+        `Median Airbnb price: ${fmtMoney(a)}`;
+    }
+
 
   });
 
