@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Housing Price Prediction Tool</title>
   <link rel="stylesheet" href="assets/css/style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -45,18 +42,9 @@
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            Location (County)
+            Location (City/Zip Code)
           </label>
-          <select id="location">
-            <option value="">Select a county...</option>
-            <option value="Los Angeles">Los Angeles</option>
-            <option value="Fresno">Fresno</option>
-            <option value="San Diego">San Diego</option>
-            <option value="Sacramento">Sacramento</option>
-            <option value="San Francisco">San Francisco</option>
-            <option value="Santa Clara">Santa Clara</option>
-            <option value="Alameda">Alameda</option>
-          </select>
+          <input type="text" id="location" placeholder="e.g., San Francisco, 94105" />
         </div>
 
         <div class="form-group">
@@ -157,7 +145,7 @@
 <script>
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-  // Update slider values in real-time
+  // Update slider values in real-time (display only)
   const crimeRateSlider = document.getElementById('crime-rate');
   const crimeRateValue = document.getElementById('crime-rate-value');
   const avgIncomeSlider = document.getElementById('avg-income');
@@ -176,13 +164,66 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Predict button handler
+  // -----------------------------------------
+  // ✅ Plan A: send only housing inputs.
+  // Backend will auto-fill city stats.
+  // -----------------------------------------
+  const API_URL = "https://team12-sta160-api-housing-5.onrender.com/predict";
   const predictBtn = document.getElementById('predict-btn');
+  const resultBox  = document.getElementById('predicted-value');
+
   if (predictBtn) {
-    predictBtn.addEventListener('click', () => {
-      // This is a placeholder - hook up your model here
-      console.log('Predict button clicked');
-      // You can collect all form values here and send to your prediction API
+    predictBtn.addEventListener('click', async () => {
+      const location = document.getElementById('location').value.trim();
+      const beds = Number(document.getElementById('bedrooms').value);
+      const baths = Number(document.getElementById('bathrooms').value);
+      const livingSpace = Number(document.getElementById('square-footage').value);
+
+      if (!location) {
+        alert("Please enter a city or zip code (e.g., Los Angeles, 90012).");
+        return;
+      }
+      if (!beds || !baths || !livingSpace) {
+        alert("Please fill Bedrooms, Bathrooms, and Square Footage.");
+        return;
+      }
+
+      const payload = {
+        Location: location,
+        Beds: beds,
+        Baths: baths,
+        LivingSpace: livingSpace
+      };
+
+      resultBox.textContent = "Predicting... (may take up to ~30s first time)";
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text);
+        }
+
+        const data = await response.json();
+        const price = Number(data.predicted_price);
+
+        if (!isFinite(price) || price <= 0) {
+          resultBox.textContent = "Prediction unavailable";
+          return;
+        }
+
+        resultBox.textContent =
+          "$" + price.toFixed(0).toLocaleString();
+
+      } catch (err) {
+        console.error(err);
+        resultBox.textContent = "Error getting prediction";
+      }
     });
   }
 });
