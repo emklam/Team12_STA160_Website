@@ -5,53 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Interactive Map | California Dashboard</title>
 
-  <!-- overview -->
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- MapLibre GL-->
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
 
-  <!-- PapaParse（浏览器解析 CSV）-->
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+
+  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
+
 <div class="nav-wrap">
   <nav class="nav">
-    <div class="brand">
+    <a href="index.html" class="brand">
       <svg class="brand-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 21V9L12 2L21 9V21H14V14H10V21H3Z" stroke="#4A90E2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M8 10L12 6L16 10" stroke="#4A90E2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M3 21V9L12 2L21 9V21H14V14H10V21H3Z" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 10L12 6L16 10" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       <span>CalHousing</span>
+    </a>
+
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="predictor.html">Housing Prediction</a>
+        <a href="airbnb_predictor.html">Airbnb Prediction</a>
+        <a href="map.html" class="active">Housing Map</a>
+        <a href="airbnb-map.html">Airbnb Map</a>
+        <a href="trends.html">Trends</a>
     </div>
-    <a href="index.html">Home</a>
-    <a href="predictor.html">Housing Price Prediction</a>
-    <a href="airbnb_predictor.html">Airbnb Price Prediction</a>
-    <a href="map.html" class="active">Housing Map</a>
-    <a href="airbnb-map.html">Airbnb Map</a>
-    <a href="trends.html">Housing Trends Dashboard</a>
   </nav>
 </div>
 
+<main class="container">
+  <section class="map-section">
+    <div class="card" style="padding: 0; overflow: hidden; border: none;">
+        <div id="map" class="map"></div>
 
-  <main class="container">
+        <div class="map-legend-container">
+            <p class="caption" id="legend" style="margin: 0;">
+               <span style="display:inline-block; width:10px; height:10px; background:#EFF6FF; border:1px solid #ccc; margin-right:4px;"></span>
+               <span style="margin-right:12px;">Low Price</span>
+               <span style="display:inline-block; width:10px; height:10px; background:#1D4ED8; margin-right:4px;"></span>
+               <span>High Price</span>
+            </p>
+        </div>
+    </div>
+  </section>
+</main>
 
-    <!-- map page -->
-    <section>
-  <div id="map" class="map"></div>
-
-  <p class="caption" id="legend">
-    Legend: lighter → lower median housing price, darker → higher median housing price.
-  </p>
-</section>
-
-  </main>
-
-  <!-- script (no error when the element does not exist)）-->
-  <script src="assets/js/app.js"></script>
 <div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
+
+<script src="assets/js/app.js"></script>
 
 </body>
 </html>
-
