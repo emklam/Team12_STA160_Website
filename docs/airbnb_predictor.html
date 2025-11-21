@@ -145,7 +145,7 @@
 <script>
 // Wait for DOM to be fully loaded
 document.addEventListener('DOMContentLoaded', function() {
-  // Update slider values in real-time
+  // -------- Slider display logic (keep this behavior) --------
   const crimeRateSlider = document.getElementById('crime-rate');
   const crimeRateValue = document.getElementById('crime-rate-value');
   const avgIncomeSlider = document.getElementById('avg-income');
@@ -164,17 +164,109 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Predict button handler
+  // -------- API call logic --------
   const predictBtn = document.getElementById('predict-btn');
+  const predictedValueEl = document.getElementById('predicted-value');
+
+  // ★★★★★ Replace localhost with your Render backend URL ★★★★★
+  const API_URL = "https://team12-sta160-api3-1.onrender.com/predict";
+
+  async function callPrediction() {
+    // 1) Read values from form
+    const rawLocation = document.getElementById('location').value || 'San Francisco';
+    const city = rawLocation.split(',')[0].trim() || 'San Francisco';
+
+    const bedrooms = Number(document.getElementById('bedrooms').value) || 0;
+    const bathrooms = Number(document.getElementById('bathrooms').value) || 0;
+    const totalRooms = Number(document.getElementById('total-rooms').value) || 0;
+
+    // simple guess for beds
+    const beds = Math.max(bedrooms, 1);
+
+    // 2) Build features dict (must match model feature names)
+    const features = {
+      bathrooms: bathrooms,
+      bedrooms: bedrooms,
+      beds: beds,
+
+      "shared_bathroom": 0,
+      "air conditioning": 1,
+      "bathtub": 0,
+      "dishwasher": 1,
+      "dryer": 1,
+      "freezer": 1,
+      "heating": 1,
+      "hot water": 1,
+      "oven": 1,
+      "parking": 0,
+      "refrigerator": 1,
+      "stove": 1,
+      "tv": 1,
+      "washer": 1,
+      "wifi": 1
+    };
+
+    // 3) Show loading
+    if (predictedValueEl) {
+      predictedValueEl.textContent = 'Predicting...';
+    }
+
+    try {
+
+      // ★★★★★ Final: call real backend ★★★★★
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ city, features }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || ('Request failed with status ' + res.status));
+      }
+
+      const data = await res.json();
+
+      // 你的后端返回的是 predicted_price
+      let price = data.predicted_price;
+          
+      // 兼容一下其它可能的字段名（防止以后你改后端）
+      if (price === undefined || price === null) {
+        price = data.prediction;
+      }
+      if (price === undefined || price === null) {
+        price = data.price;
+      }
+      
+      price = Number(price);
+      
+      if (!isFinite(price)) {
+        throw new Error("API returned invalid price: " + JSON.stringify(data));
+      }
+      
+      if (predictedValueEl) {
+        predictedValueEl.textContent = '$' + price.toFixed(0) + '/night';
+      }
+
+
+    } catch (err) {
+      console.error(err);
+      if (predictedValueEl) {
+        predictedValueEl.textContent = 'Error fetching prediction';
+      }
+    }
+  }
+
   if (predictBtn) {
-    predictBtn.addEventListener('click', () => {
-      // This is a placeholder - hook up your model here
-      console.log('Predict button clicked');
-      // You can collect all form values here and send to your prediction API
+    predictBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      callPrediction();
     });
   }
 });
 </script>
+
+
 
 </body>
 </html>
