@@ -42,9 +42,18 @@
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            Location (City/Zip Code)
+            Location (County)
           </label>
-          <input type="text" id="location" placeholder="e.g., San Francisco, 94105" />
+          <select id="location">
+            <option value="">Select a county...</option>
+            <option value="Los Angeles">Los Angeles</option>
+            <option value="San Diego">San Diego</option>
+            <option value="Santa Clara">Santa Clara</option>
+            <option value="San Mateo">San Mateo</option>
+            <option value="Alameda">Alameda</option>
+            <option value="Santa Cruz">Santa Cruz</option>
+            <option value="Monterey">Monterey</option>
+          </select>
         </div>
 
         <div class="form-group">
@@ -173,8 +182,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   async function callPrediction() {
     // 1) Read values from form
-    const rawLocation = document.getElementById('location').value || 'San Francisco';
-    const city = rawLocation.split(',')[0].trim() || 'San Francisco';
+    const rawLocation = document.getElementById('location').value;
+    if (!rawLocation) {
+      alert('Please select a county');
+      if (predictedValueEl) {
+        predictedValueEl.textContent = 'Please select a county';
+      }
+      return;
+    }
+    const city = rawLocation.trim();
 
     const bedrooms = Number(document.getElementById('bedrooms').value) || 0;
     const bathrooms = Number(document.getElementById('bathrooms').value) || 0;
