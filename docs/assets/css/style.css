@@ -301,7 +301,7 @@ button:active {
   position: relative;
   background: linear-gradient(180deg, #FFFFFF 0%, #F0F9FF 100%);
   padding: 100px 20px 140px;
-  text-align: center; 
+  text-align: center;
   overflow: hidden;
 }
 
@@ -427,4 +427,163 @@ button:active {
   .hero-container { padding: 60px 20px; }
   .hero-buttons { flex-direction: column; width: 100%; }
   .btn { width: 100%; }
+}
+
+/* =========================================
+   10. Content Sections (Mission, Features, Tech)
+   ========================================= */
+
+/* 通用标题样式 */
+.section-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.section-desc {
+  font-size: 18px;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  line-height: 1.8;
+}
+
+.subsection-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 40px;
+  text-align: center;
+  color: var(--text-main);
+}
+
+/* --- Mission Section --- */
+.section-mission {
+  padding: 80px 24px;
+  background: #fff;
+  text-align: center;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--brand-light);
+  color: var(--brand-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 20px;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+
+/* --- Features Bento Grid --- */
+.section-features {
+  padding: 60px 24px 100px;
+  background: var(--bg-body); /* 稍微带点灰，区分层次 */
+}
+
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.bento-card {
+  padding: 32px;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+.bento-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-float);
+}
+
+.bento-card h4 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.bento-card p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.icon-box {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+
+.card-blue { background: #fff; border-top: 4px solid var(--brand-primary); }
+.card-orange { background: #fff; border-top: 4px solid #F59E0B; }
+.card-gray { background: #fff; border-top: 4px solid #6B7280; }
+.card-white { background: #fff; border-top: 4px solid #10B981; }
+
+
+.span-2 {
+  grid-column: span 2;
+}
+
+/* --- Tech Stack Section  --- */
+.section-tech {
+  background: #111827;
+  padding: 60px 24px;
+  color: #fff;
+}
+
+.tech-flex {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.tech-info h3 {
+  font-size: 24px;
+  margin: 0 0 8px;
+  color: #fff;
+}
+
+.tech-info p {
+  color: #9CA3AF;
+  margin: 0;
+}
+
+.tech-stack-list {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tech-badge {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #E5E7EB;
+}
+
+
+@media (max-width: 768px) {
+  .bento-grid { grid-template-columns: 1fr; }
+  .span-2 { grid-column: span 1; }
+  .tech-flex { flex-direction: column; align-items: flex-start; }
 }
