@@ -339,7 +339,7 @@
 
 
     <div class="chart-card span-4">
-      <h3>Room Type Distributio</h3>
+      <h3>Room Type Distribution</h3>
       <div class="chart-container" id="airbnbRoomType"></div>
     </div>
 
@@ -739,39 +739,67 @@
     // ... simple histogram logic similar to above ...
     // For brevity, basic histogram:
     charts.airbnbPriceDist.setOption({
-       xAxis: { type: 'category', data: ['Low', 'Med', 'High'] },
-       yAxis: { type: 'value' },
-       series: [{ type: 'bar', data: [prices.length * 0.5, prices.length * 0.3, prices.length * 0.2], itemStyle: { color: '#F59E0B' } }]
-    });
+  grid: {
+    left: 50, right: 20, top: 30, bottom: 40, containLabel: true
+  },
+  xAxis: { type: 'category', data: ['Low', 'Med', 'High'] },
+  yAxis: { type: 'value' },
+  series: [{
+    type: 'bar',
+    data: [prices.length * 0.5, prices.length * 0.3, prices.length * 0.2],
+    itemStyle: { color: '#F59E0B' }
+  }]
+});
 
     // 3. Bedrooms
     const bedEl = document.getElementById('airbnbBedrooms');
     if (!charts.airbnbBedrooms) charts.airbnbBedrooms = echarts.init(bedEl);
     // logic placeholders
     charts.airbnbBedrooms.setOption({
-      xAxis: { type: 'category', data: ['1 Bed', '2 Beds', '3 Beds'] },
-      yAxis: { type: 'value' },
-      series: [{ type: 'bar', data: [150, 250, 350], itemStyle: { color: '#8B5CF6' } }]
-    });
+  grid: {
+    left: 50, right: 20, top: 30, bottom: 40, containLabel: true
+  },
+  xAxis: { type: 'category', data: ['1 Bed', '2 Beds', '3 Beds'] },
+  yAxis: { type: 'value' },
+  series: [{ type: 'bar', data: [150, 250, 350], itemStyle: { color: '#8B5CF6' } }]
+});
+
 
     // 4. Reviews
     const revEl = document.getElementById('priceVsReviews');
     if (!charts.priceVsReviews) charts.priceVsReviews = echarts.init(revEl);
     const revData = filteredAirbnbData.map(d => [d.reviewScores, d.price]);
     charts.priceVsReviews.setOption({
-      xAxis: { type: 'value', min: 0, max: 10 }, yAxis: { type: 'value' },
-      series: [{ type: 'scatter', data: revData, itemStyle: { color: '#EC4899', opacity: 0.6 } }]
-    });
+  grid: {
+    left: 50, right: 20, top: 30, bottom: 40, containLabel: true
+  },
+  xAxis: { type: 'value', min: 0, max: 10 },
+  yAxis: { type: 'value' },
+  series: [{
+    type: 'scatter',
+    data: revData,
+    itemStyle: { color: '#EC4899', opacity: 0.6 }
+  }]
+});
+
 
     // 5. County
     const ctyEl = document.getElementById('airbnbPriceByCounty');
     if (!charts.airbnbPriceByCounty) charts.airbnbPriceByCounty = echarts.init(ctyEl);
     // logic placeholder
     charts.airbnbPriceByCounty.setOption({
-      xAxis: { type: 'category', data: airbnbCounties },
-      yAxis: { type: 'value' },
-      series: [{ type: 'bar', data: [100, 200, 150, 180, 220, 190, 210], itemStyle: { color: '#F59E0B' } }]
-    });
+  grid: {
+    left: 50, right: 20, top: 30, bottom: 40, containLabel: true
+  },
+  xAxis: { type: 'category', data: airbnbCounties },
+  yAxis: { type: 'value' },
+  series: [{
+    type: 'bar',
+    data: [100, 200, 150, 180, 220, 190, 210],
+    itemStyle: { color: '#F59E0B' }
+  }]
+});
+
   }
 
   // Resize listener
