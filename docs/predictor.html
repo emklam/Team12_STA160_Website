@@ -174,6 +174,43 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // County-specific square footage ranges
+  const countySquareFootageRanges = {
+    'Alameda': { min: 420, max: 9220 },
+    'Fresno': { min: 472, max: 33308 },
+    'Los Angeles': { min: 256, max: 40000 },
+    'Sacramento': { min: 430, max: 4955 },
+    'San Diego': { min: 318, max: 9726 },
+    'San Francisco': { min: 462, max: 11155 },
+    'Santa Clara': { min: 368, max: 19550 }
+  };
+
+  // Update square footage slider based on selected county
+  const locationSelect = document.getElementById('location');
+  if (locationSelect && squareFootageSlider && squareFootageValue) {
+    locationSelect.addEventListener('change', (e) => {
+      const selectedCounty = e.target.value;
+      if (selectedCounty && countySquareFootageRanges[selectedCounty]) {
+        const range = countySquareFootageRanges[selectedCounty];
+        squareFootageSlider.min = range.min;
+        squareFootageSlider.max = range.max;
+        // Set value to midpoint of range, or keep current if within range
+        const currentValue = parseInt(squareFootageSlider.value);
+        const newValue = (currentValue >= range.min && currentValue <= range.max) 
+          ? currentValue 
+          : Math.round((range.min + range.max) / 2);
+        squareFootageSlider.value = newValue;
+        squareFootageValue.textContent = newValue.toLocaleString();
+      } else {
+        // Reset to default if no county selected
+        squareFootageSlider.min = 256;
+        squareFootageSlider.max = 40000;
+        squareFootageSlider.value = 1500;
+        squareFootageValue.textContent = '1,500';
+      }
+    });
+  }
+
   // -----------------------------------------
   // ✅ Plan A: send only housing inputs.
   // Backend will auto-fill city stats.
