@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         resultBox.textContent =
-          "$" + price.toFixed(0).toLocaleString();
+          "$" + price.toLocaleString('en-US', { maximumFractionDigits: 0 });
 
       } catch (err) {
         console.error(err);

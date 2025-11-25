@@ -306,7 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       if (predictedValueEl) {
-        predictedValueEl.textContent = '$' + price.toFixed(0) + '/night';
+        predictedValueEl.textContent = '$' + price.toLocaleString('en-US', { maximumFractionDigits: 0 }) + '/night';
       }
 
 
