@@ -3,62 +3,351 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Interactive Map | California Dashboard</title>
+  <title>California Market Map</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link href="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.css" rel="stylesheet" />
   <script src="https://unpkg.com/maplibre-gl@3.6.1/dist/maplibre-gl.js"></script>
-
   <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
-  <link rel="stylesheet" href="assets/css/style.css" />
+  <style>
+    /* ================= Clean Light ================= */
+    body { margin: 0; padding: 0; font-family: 'Inter', sans-serif; background: #f8fafc; overflow: hidden; }
+
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; height: 100%; }
+
+    /* navigator */
+    .glass-nav {
+      position: absolute; top: 24px; left: 50%; transform: translateX(-50%); z-index: 10;
+      background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px);
+      padding: 6px 8px; border-radius: 100px;
+      border: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      display: flex; gap: 4px;
+    }
+    .glass-nav a {
+      color: #64748b; text-decoration: none; font-size: 13px; font-weight: 500;
+      padding: 8px 16px; border-radius: 20px; transition: 0.2s;
+    }
+    .glass-nav a:hover { color: #0f172a; background: #f1f5f9; }
+    .glass-nav a.active { background: #0f172a; color: #fff; }
+
+
+    .control-panel {
+      position: absolute; top: 90px; left: 24px; z-index: 10; width: 260px;
+      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px);
+      border: 1px solid rgba(0,0,0,0.05); border-radius: 20px; padding: 24px;
+      color: #0f172a; box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+    }
+    .panel-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #0f172a; }
+    .panel-subtitle { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+
+    .mode-switch { display: flex; background: #f1f5f9; border-radius: 12px; padding: 4px; gap: 4px; }
+    .mode-btn {
+      flex: 1; border: none; background: transparent; color: #64748b; padding: 10px;
+      font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: 0.2s;
+    }
+    .mode-btn:hover { color: #334155; }
+
+
+    .mode-btn.active#btnHousing {
+      background: #fff; color: #0284c7;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);
+    }
+    .mode-btn.active#btnAirbnb {
+      background: #fff; color: #e11d48;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    /* sider */
+    .detail-drawer {
+      position: absolute; top: 24px; bottom: 24px; right: -420px; width: 340px;
+      background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(0,0,0,0.05);
+      border-radius: 24px; z-index: 20; padding: 32px;
+      transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: -10px 0 40px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    .detail-drawer.open { right: 24px; }
+
+    .drawer-header h2 { font-size: 28px; font-weight: 800; margin: 0; color: #0f172a; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; margin-top: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
+    .badge-blue { background: #e0f2fe; color: #0284c7; }
+
+    .stat-row { display: flex; gap: 16px; margin-top: 32px; }
+    .stat-box { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 16px; }
+    .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
+    .stat-val { font-size: 18px; font-weight: 700; color: #0f172a; }
+
+    /* 城市列表 */
+    .city-list { margin-top: 32px; }
+    .city-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; color: #334155; }
+    .city-item:last-child { border: none; }
+    .rank-num { color: #94a3b8; font-family: monospace; margin-right: 12px; }
+
+    /* HUD (悬浮提示) */
+    .hover-hud {
+      position: absolute; z-index: 50; pointer-events: none;
+      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(8px);
+      border: 1px solid rgba(0,0,0,0.1); padding: 8px 12px; border-radius: 8px;
+      color: #0f172a; font-size: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      display: none; transform: translate(15px, 15px);
+    }
+    .hud-title { font-weight: 600; color: #64748b; margin-bottom: 2px; }
+    .hud-value { font-weight: 700; font-size: 14px; }
+
+    /* 图例 */
+    .legend-wrapper { position: absolute; bottom: 30px; left: 24px; z-index: 10; background: rgba(255,255,255,0.8); padding: 12px; border-radius: 12px; backdrop-filter: blur(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .legend-bar { width: 180px; height: 6px; border-radius: 3px; margin-bottom: 8px; }
+    .legend-labels { display: flex; justify-content: space-between; font-size: 11px; color: #64748b; font-weight: 500; }
+
+    .close-btn { position: absolute; top: 24px; right: 24px; cursor: pointer; color: #94a3b8; transition: 0.2s; }
+    .close-btn:hover { color: #0f172a; transform: scale(1.1); }
+  </style>
 </head>
 <body>
 
-<div class="nav-wrap">
-  <nav class="nav">
-    <a href="index.html" class="brand">
-      <svg class="brand-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 21V9L12 2L21 9V21H14V14H10V21H3Z" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M8 10L12 6L16 10" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>CalHousing</span>
-    </a>
+  <div id="map"></div>
 
-    <div class="nav-links">
-        <a href="index.html">Home</a>
-        <a href="predictor.html">Housing Prediction</a>
-        <a href="airbnb_predictor.html">Airbnb Prediction</a>
-        <a href="map.html" class="active">Housing Map</a>
-        <a href="airbnb-map.html">Airbnb Map</a>
-        <a href="trends.html">Trends</a>
+  <div id="hud" class="hover-hud">
+    <div class="hud-title">Region</div>
+    <div class="hud-value">$0</div>
+  </div>
+
+  <div class="glass-nav">
+    <a href="index.html">Home</a>
+    <a href="trends.html">Trends</a>
+    <a href="#" class="active">Map</a>
+  </div>
+
+  <div class="control-panel">
+    <div class="panel-title">Market Explorer</div>
+    <div class="panel-subtitle">Select Metric</div>
+    <div class="mode-switch">
+      <button class="mode-btn active" id="btnHousing" onclick="setMode('housing')">Housing</button>
+      <button class="mode-btn" id="btnAirbnb" onclick="setMode('airbnb')">Airbnb</button>
     </div>
-  </nav>
-</div>
+  </div>
 
-<main class="container">
-  <section class="map-section">
-    <div class="card" style="padding: 0; overflow: hidden; border: none;">
-        <div id="map" class="map"></div>
-
-        <div class="map-legend-container">
-            <p class="caption" id="legend" style="margin: 0;">
-               <span style="display:inline-block; width:10px; height:10px; background:#EFF6FF; border:1px solid #ccc; margin-right:4px;"></span>
-               <span style="margin-right:12px;">Low Price</span>
-               <span style="display:inline-block; width:10px; height:10px; background:#1D4ED8; margin-right:4px;"></span>
-               <span>High Price</span>
-            </p>
-        </div>
+  <div class="detail-drawer" id="drawer">
+    <div class="close-btn" onclick="closeDrawer()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
     </div>
-  </section>
-</main>
+    <div class="drawer-header">
+      <h2 id="d-name">Select Region</h2>
+      <span class="badge badge-blue">County Data</span>
+    </div>
 
-<div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
+    <div class="stat-row">
+      <div class="stat-box">
+        <div class="stat-label">Median Home Price</div>
+        <div class="stat-val" id="d-h-price" style="color:#0284c7">-</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">Airbnb Avg Nightly</div>
+        <div class="stat-val" id="d-a-price" style="color:#e11d48">-</div>
+      </div>
+    </div>
 
-<script src="assets/js/app.js"></script>
+    <div id="city-list-container" class="city-list"></div>
+  </div>
 
+  <div class="legend-wrapper">
+    <div class="legend-bar" id="legendGradient" style="background: linear-gradient(to right, #bae6fd, #0284c7);"></div>
+    <div class="legend-labels"><span>Low</span><span>High</span></div>
+  </div>
+
+<script>
+  let map, currentMode = 'housing', countyCityData = {};
+
+
+  map = new maplibregl.Map({
+    container: 'map',
+    style: 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json', // 🔥 改为浅色 Positron 风格
+    center: [-119.4, 37.0],
+    zoom: 5.5,
+    antialias: true
+  });
+
+  map.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
+
+  map.on('load', async () => {
+    const [geoJson, housingCsv, airbnbCsv] = await Promise.all([
+      fetch('data/ca_counties.geojson').then(r => r.json()),
+      loadCsv('data/housingvars.csv'),
+      loadCsv('data/airbnbvars.csv')
+    ]);
+
+    processData(geoJson, housingCsv, airbnbCsv);
+
+    const bounds = new maplibregl.LngLatBounds();
+    let hasData = false;
+    geoJson.features.forEach(f => {
+      if(f.properties.h_price > 0 || f.properties.a_price > 0) {
+        hasData = true;
+        f.geometry.coordinates.forEach(c => {
+          (f.geometry.type==='MultiPolygon'?c.flat():c).forEach(p=>{if(Array.isArray(p)) bounds.extend(p)});
+        });
+      }
+    });
+
+    map.addSource('counties', { type: 'geojson', data: geoJson });
+
+
+    map.addLayer({
+      'id': 'counties-fill',
+      'type': 'fill',
+      'source': 'counties',
+      'paint': {
+        'fill-color': [
+          'case', ['==', ['get', 'value'], 0], 'transparent',
+          // Housing
+          ['interpolate', ['linear'], ['get', 'value'], 1, '#bae6fd', 1000000, '#0284c7']
+        ],
+        'fill-opacity': 0.85
+      }
+    });
+
+
+    map.addLayer({
+      'id': 'counties-outline',
+      'type': 'line',
+      'source': 'counties',
+      'paint': {
+        'line-color': '#fff', // 统一白边
+        'line-width': 1,
+        'line-opacity': 0.5
+      }
+    });
+
+
+    const hud = document.getElementById('hud');
+    const hudTitle = hud.querySelector('.hud-title');
+    const hudValue = hud.querySelector('.hud-value');
+
+    map.on('mousemove', 'counties-fill', (e) => {
+      const p = e.features[0].properties;
+      map.getCanvas().style.cursor = 'pointer';
+
+      if (p.value > 0) {
+
+        map.setPaintProperty('counties-fill', 'fill-opacity', [
+          'case', ['==', ['get', 'name_display'], p.name_display], 1.0, 0.7
+        ]);
+
+        hud.style.display = 'block';
+        hud.style.left = e.point.x + 'px';
+        hud.style.top = e.point.y + 'px';
+        hudTitle.innerText = p.name_display;
+        const val = currentMode === 'housing' ? p.h_price : p.a_price;
+        hudValue.innerText = val ? '$' + val.toLocaleString() : 'No Data';
+
+        hudValue.style.color = currentMode === 'housing' ? '#0284c7' : '#e11d48';
+      } else {
+        hud.style.display = 'none';
+      }
+    });
+
+    map.on('mouseleave', 'counties-fill', () => {
+      map.getCanvas().style.cursor = '';
+      map.setPaintProperty('counties-fill', 'fill-opacity', 0.85);
+      hud.style.display = 'none';
+    });
+
+    map.on('click', 'counties-fill', (e) => {
+      const p = e.features[0].properties;
+      if(p.value > 0 || p.a_price > 0) {
+        openDrawer(p);
+        map.easeTo({ center: e.lngLat, zoom: 7.5, duration: 800 });
+      }
+    });
+
+    if(hasData) map.fitBounds(bounds, { padding: {top:50, bottom:50, left:50, right:400} });
+  });
+
+  // Helpers
+  function loadCsv(url){return new Promise(r=>Papa.parse(url,{download:true,header:true,dynamicTyping:true,skipEmptyLines:true,complete:res=>r(res.data)}))}
+  function norm(s){return String(s||'').toLowerCase().replace(' county','').trim()}
+
+  function processData(geo, hData, aData) {
+    const hMap={}, hCount={};
+    const hKeys=Object.keys(hData[0]||{});
+    const hC=hKeys.find(k=>k.toLowerCase().includes('county')), hP=hKeys.find(k=>k.toLowerCase().includes('price'));
+    if(hC&&hP) hData.forEach(r=>{
+      const c=norm(r[hC]), p=r[hP]; if(!c||!p||isNaN(p))return;
+      if(!hMap[c]){hMap[c]=0;hCount[c]=0} hMap[c]+=p;hCount[c]++;
+    });
+    Object.keys(hMap).forEach(k=>hMap[k]=Math.round(hMap[k]/hCount[k]));
+
+    const aMap={}, aCity={};
+    aData.forEach(r=>{
+      const c=norm(r.county), city=r.city||'Unknown', p=r.price; if(!c||!p||isNaN(p))return;
+      if(!aCity[c]) aCity[c]=[]; aCity[c].push({city, price:p});
+    });
+    Object.keys(aCity).forEach(c=>{
+      const l=aCity[c];
+      aMap[c]=Math.round(l.reduce((s,i)=>s+i.price,0)/l.length);
+      const g={}; l.forEach(i=>{if(!g[i.city])g[i.city]={s:0,c:0};g[i.city].s+=i.price;g[i.city].c++});
+      countyCityData[c]=Object.keys(g).map(n=>({name:n,price:Math.round(g[n].s/g[n].c)})).sort((a,b)=>b.price-a.price).slice(0,5);
+    });
+
+    geo.features.forEach(f=>{
+      const n=f.properties.NAME||f.properties.name||f.properties.CountyName||f.properties.county||"Unknown";
+      const c=norm(n);
+      const hv=hMap[c]||0, av=aMap[c]||0;
+      f.properties.h_price=hv; f.properties.a_price=av;
+      f.properties.name_display=n; f.properties.clean_name=c;
+      f.properties.value=hv;
+    });
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(mode==='housing'?'btnHousing':'btnAirbnb').classList.add('active');
+
+    if(mode === 'housing') {
+
+      map.setPaintProperty('counties-fill', 'fill-color', [
+        'case', ['==', ['get', 'value'], 0], 'transparent',
+        ['interpolate', ['linear'], ['get', 'h_price'], 0, '#bae6fd', 1000000, '#0284c7']
+      ]);
+      document.getElementById('legendGradient').style.background = 'linear-gradient(to right, #bae6fd, #0284c7)';
+    } else {
+
+      map.setPaintProperty('counties-fill', 'fill-color', [
+        'case', ['==', ['get', 'a_price'], 0], 'transparent',
+        ['interpolate', ['linear'], ['get', 'a_price'], 0, '#fecdd3', 500, '#e11d48']
+      ]);
+      document.getElementById('legendGradient').style.background = 'linear-gradient(to right, #fecdd3, #e11d48)';
+    }
+  }
+
+  function openDrawer(p) {
+    document.getElementById('drawer').classList.add('open');
+    document.getElementById('d-name').innerText = p.name_display;
+    document.getElementById('d-h-price').innerText = p.h_price?'$'+p.h_price.toLocaleString():'-';
+    document.getElementById('d-a-price').innerText = p.a_price?'$'+p.a_price.toLocaleString():'-';
+
+    const div = document.getElementById('city-list-container');
+    div.innerHTML = '';
+    if(currentMode==='airbnb' && countyCityData[p.clean_name]) {
+      let h = '<div style="font-size:11px;color:#64748b;margin-bottom:12px;text-transform:uppercase;font-weight:600">Top 5 Cities (Avg Price)</div>';
+      countyCityData[p.clean_name].forEach((c, i)=>{
+        h += `
+          <div class="city-item">
+            <div><span class="rank-num">0${i+1}</span><span>${c.name}</span></div>
+            <span style="color:#0f172a;font-weight:600">$${c.price}</span>
+          </div>`;
+      });
+      div.innerHTML = h;
+    }
+  }
+  function closeDrawer(){ document.getElementById('drawer').classList.remove('open'); }
+</script>
 </body>
 </html>
