@@ -35,6 +35,6 @@ California Housing Price Predictor is a class project that combines geospatial v
 
 • Data: Public datasets (e.g., California housing data, Airbnb listings, county crime rate, walkability, etc.)
 
-• Hosting: GitHub Pages (gh-pages)
+• Hosting: GitHub Pages
 
 
