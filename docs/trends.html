@@ -391,6 +391,15 @@
     return Math.round(num).toString();
   }
 
+  // Formatter for axis labels (for ECharts)
+  function formatAxisLabel(value) {
+    if (value === null || value === undefined || isNaN(value)) return '0';
+    const absValue = Math.abs(value);
+    if (absValue >= 1000000) return (value / 1000000).toFixed(1) + 'M';
+    if (absValue >= 1000) return (value / 1000).toFixed(0) + 'K';
+    return Math.round(value).toString();
+  }
+
   function formatCurrency(num) {
     if (num === null || num === undefined || isNaN(num)) return '$0';
     const absNum = Math.abs(num);
@@ -654,7 +663,7 @@
     charts.priceOverTime.setOption({
       tooltip: { trigger: 'axis', formatter: p => `${p[0].name}<br/>Avg: ${formatCurrency(p[0].value)}` },
       xAxis: { type: 'category', data: countyAverages.map(d => d.county), axisLabel: { rotate: 45 } },
-      yAxis: { type: 'value' },
+      yAxis: { type: 'value', axisLabel: { formatter: formatAxisLabel } },
       series: [{ type: 'line', data: countyAverages.map(d => d.avgPrice), smooth: true, itemStyle: { color: '#2563EB' }, lineStyle: { width: 3 } }]
     });
 
@@ -671,7 +680,7 @@
     charts.priceDistribution.setOption({
       tooltip: { trigger: 'axis' },
       xAxis: { type: 'category', data: histogram.map((_, i) => formatNumber(minPrice + i * binSize)), axisLabel: { rotate: 45, fontSize: 10 } },
-      yAxis: { type: 'value' },
+      yAxis: { type: 'value', axisLabel: { formatter: formatAxisLabel } },
       series: [{ type: 'bar', data: histogram, itemStyle: { color: '#60A5FA' } }]
     });
 
@@ -681,8 +690,8 @@
     const sizePriceData = filteredHousingData.filter(d => d.livingSpace > 0 && d.price > 0).map(d => [d.livingSpace, d.price]);
     charts.sizeVsPrice.setOption({
       tooltip: { trigger: 'item' },
-      xAxis: { type: 'value', name: 'Sq Ft', splitLine: { show: false } },
-      yAxis: { type: 'value', name: 'Price', splitLine: { lineStyle: { type: 'dashed' } } },
+      xAxis: { type: 'value', name: 'Sq Ft', splitLine: { show: false }, axisLabel: { formatter: formatAxisLabel } },
+      yAxis: { type: 'value', name: 'Price', splitLine: { lineStyle: { type: 'dashed' } }, axisLabel: { formatter: formatAxisLabel } },
       series: [{ type: 'scatter', data: sizePriceData, symbolSize: 4, itemStyle: { color: '#2563EB', opacity: 0.5 } }]
     });
 
@@ -692,7 +701,7 @@
     charts.priceByCounty.setOption({
       tooltip: { trigger: 'axis' },
       xAxis: { type: 'category', data: countyAverages.map(d=>d.county), axisLabel: { rotate: 45 } },
-      yAxis: { type: 'value' },
+      yAxis: { type: 'value', axisLabel: { formatter: formatAxisLabel } },
       series: [{ type: 'bar', data: countyAverages.map(d=>d.avgPrice), itemStyle: { color: '#3B82F6', borderRadius: [4, 4, 0, 0] } }]
     });
 
@@ -702,7 +711,8 @@
        if (!charts.priceVsCrime) charts.priceVsCrime = echarts.init(crimeEl);
        const crimeData = filteredHousingData.map(d=>[d.crimeRate, d.price]);
        charts.priceVsCrime.setOption({
-         xAxis: {type:'value', name:'Crime'}, yAxis: {type:'value'},
+         xAxis: {type:'value', name:'Crime'}, 
+         yAxis: {type:'value', axisLabel: { formatter: formatAxisLabel }},
          series: [{type:'scatter', data: crimeData, itemStyle:{color:'#EF4444'}}]
        });
     }
@@ -711,7 +721,8 @@
        if (!charts.priceVsIncome) charts.priceVsIncome = echarts.init(incomeEl);
        const incomeData = filteredHousingData.map(d=>[d.householdIncome, d.price]);
        charts.priceVsIncome.setOption({
-         xAxis: {type:'value', name:'Income'}, yAxis: {type:'value'},
+         xAxis: {type:'value', name:'Income', axisLabel: { formatter: formatAxisLabel }}, 
+         yAxis: {type:'value', axisLabel: { formatter: formatAxisLabel }},
          series: [{type:'scatter', data: incomeData, itemStyle:{color:'#10B981'}}]
        });
     }
@@ -745,7 +756,7 @@
     left: 50, right: 20, top: 30, bottom: 40, containLabel: true
   },
   xAxis: { type: 'category', data: ['Low', 'Med', 'High'] },
-  yAxis: { type: 'value' },
+  yAxis: { type: 'value', axisLabel: { formatter: formatAxisLabel } },
   series: [{
     type: 'bar',
     data: [prices.length * 0.5, prices.length * 0.3, prices.length * 0.2],
@@ -762,7 +773,7 @@
     left: 50, right: 20, top: 30, bottom: 40, containLabel: true
   },
   xAxis: { type: 'category', data: ['1 Bed', '2 Beds', '3 Beds'] },
-  yAxis: { type: 'value' },
+  yAxis: { type: 'value', axisLabel: { formatter: formatAxisLabel } },
   series: [{ type: 'bar', data: [150, 250, 350], itemStyle: { color: '#8B5CF6' } }]
 });
 
@@ -776,7 +787,7 @@
     left: 50, right: 20, top: 30, bottom: 40, containLabel: true
   },
   xAxis: { type: 'value', min: 0, max: 10 },
-  yAxis: { type: 'value' },
+  yAxis: { type: 'value', axisLabel: { formatter: formatAxisLabel } },
   series: [{
     type: 'scatter',
     data: revData,
