@@ -305,7 +305,8 @@
     <h2>🏠 Housing Market Analysis</h2>
   </div>
 
-  <div class="chart-card span-6">
+  <div class="bento-grid">
+    <div class="chart-card span-6">
       <h3>Price Trends Over Regions</h3>
       <div class="chart-container" id="priceOverTime"></div>
     </div>
@@ -314,8 +315,6 @@
       <h3>Price Distribution</h3>
       <div class="chart-container" id="priceDistribution"></div>
     </div>
-
-
 
     <div class="chart-card span-6">
       <h3>Living Space vs. Price</h3>
@@ -331,6 +330,7 @@
       <h3>Impact of Crime Rate</h3>
       <div class="chart-container" id="priceVsCrime"></div>
     </div>
+
     <div class="chart-card span-6">
       <h3>Income Correlation</h3>
       <div class="chart-container" id="priceVsIncome"></div>
@@ -343,28 +343,24 @@
 
   <div class="bento-grid">
 
-
-    <div class="chart-card span-4">
+    <div class="chart-card span-6">
       <h3>Room Type Distribution</h3>
       <div class="chart-container" id="airbnbRoomType"></div>
     </div>
 
-    <div class="chart-card span-4">
+    <div class="chart-card span-6">
       <h3>Review Scores Impact</h3>
       <div class="chart-container" id="priceVsReviews"></div>
     </div>
-    <div class="chart-card span-4">
+
+    <div class="chart-card span-6">
       <h3>Bedroom Premium</h3>
       <div class="chart-container" id="airbnbBedrooms"></div>
     </div>
-    <div class="chart-card span-4">
+
+    <div class="chart-card span-6">
       <h3>Price Distribution</h3>
       <div class="chart-container" id="airbnbPriceDist"></div>
-    </div>
-
-    <div class="chart-card span-12">
-      <h3>County Comparison (Airbnb)</h3>
-      <div class="chart-container" id="airbnbPriceByCounty"></div>
     </div>
   </div>
 
@@ -788,23 +784,6 @@
   }]
 });
 
-
-    // 5. County
-    const ctyEl = document.getElementById('airbnbPriceByCounty');
-    if (!charts.airbnbPriceByCounty) charts.airbnbPriceByCounty = echarts.init(ctyEl);
-    // logic placeholder
-    charts.airbnbPriceByCounty.setOption({
-  grid: {
-    left: 50, right: 20, top: 30, bottom: 40, containLabel: true
-  },
-  xAxis: { type: 'category', data: airbnbCounties },
-  yAxis: { type: 'value' },
-  series: [{
-    type: 'bar',
-    data: [100, 200, 150, 180, 220, 190, 210],
-    itemStyle: { color: '#F59E0B' }
-  }]
-});
 
   }
 
