@@ -50,7 +50,7 @@
     <section style="margin-bottom: 40px;">
       <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Our Approach</h2>
       <p style="margin-bottom: 16px;">
-        We combined public housing sales data (46 counties) with Airbnb listings (8 cities/counties) and augmented both with county‑level context such as population, commute modes, private school enrollment, income levels, and crime rates. After rigorous cleaning (merging sources, normalizing columns, converting text to numeric, removing missing prices, selecting key amenities, log‑transforming skewed prices), we split data into training/test sets and modeled each area separately to reflect local market behavior.
+        We combined public housing sales data with Airbnb listings and augmented both with county‑level context such as population, commute modes, private school enrollment, income levels, and crime rates. After rigorous cleaning (merging sources, normalizing columns, converting text to numeric, removing missing prices, selecting key amenities, log‑transforming skewed prices), we split data into training/test sets and modeled each area separately to reflect local market behavior.
       </p>
       <p style="margin-bottom: 16px;">
         For housing, we tested Linear/Ridge/Lasso, Random Forest, and XGBoost, selecting Random Forest (200 trees) for its stronger accuracy in major markets like Los Angeles and San Francisco. For Airbnb, we built a stacked ensemble: XGBoost and Random Forest as base learners with cross‑validated out‑of‑fold predictions, combined by a simple linear meta‑model. We applied light winsorization and log transforms to stabilize extreme values and skew.
