@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Introduction - California Housing Price Predictor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<div class="nav-wrap">
+  <nav class="nav">
+    <div class="brand">
+      <svg class="brand-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 21V9L12 2L21 9V21H14V14H10V21H3Z" stroke="#4A90E2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8 10L12 6L16 10" stroke="#4A90E2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>CalHousing</span>
+    </div>
+    <a href="index.html">Home</a>
+    <a href="introduction.html" class="active">Introduction</a>
+    <a href="predictor.html">Housing Price Prediction</a>
+    <a href="airbnb_predictor.html">Airbnb Price Prediction</a>
+    <a href="map.html">Map</a>
+    <a href="trends.html">Housing Trends Dashboard</a>
+  </nav>
+</div>
+
+<div class="container" style="max-width: 900px; margin: 60px auto; padding: 0 20px;">
+  <div style="margin-bottom: 40px;">
+    <h1 style="font-size: 48px; font-weight: 800; line-height: 1.2; margin-bottom: 16px; color: #111827;">Understanding California's Housing Market</h1>
+    <p style="font-size: 20px; color: #6B7280; line-height: 1.6;">A data-driven exploration of housing prices and short-term rental markets across California</p>
+  </div>
+
+  <div style="background: #fff; border-radius: 20px; padding: 48px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); border: 1px solid #E5E7EB; line-height: 1.8; color: #374151;">
+    
+    <section style="margin-bottom: 40px;">
+      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">The Problem We're Addressing</h2>
+      <p style="margin-bottom: 16px;">
+        California's housing market is one of the most complex and expensive in the United States. Prices vary dramatically across regions—a home in San Francisco might cost three times more than a similar property in Fresno—and the factors influencing these differences aren't always obvious. At the same time, the rise of short-term rental platforms like Airbnb has created a parallel market, leaving property owners to decide between long-term rentals and potentially higher nightly rates.
+      </p>
+      <p>
+        Our project addresses these challenges by combining machine learning with interactive data visualization. We've built tools that help users predict housing prices, compare long-term and short-term rental markets, and explore the factors that drive property values across California's diverse counties.
+      </p>
+    </section>
+
+    <section style="margin-bottom: 40px;">
+      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Our Approach</h2>
+      <p style="margin-bottom: 16px;">
+        We developed a comprehensive web platform integrating predictive modeling with interactive exploration. For housing price prediction, we trained models using data from over 6,000 properties across seven major California counties, considering location, property size, neighborhood characteristics (crime rates, household income), and regional demographics. We used Random Forest, Gradient Boosting, and ensemble methods, evaluated with cross-validation to ensure reliability.
+      </p>
+      <p style="margin-bottom: 16px;">
+        For Airbnb market analysis, we processed over 42,000 listings, incorporating property features and amenities (AC, parking, laundry, wifi, kitchen appliances). We found amenities significantly impact pricing—properties with full amenities command 20-30% higher rates. To make insights accessible, we built interactive visualizations using MapLibre GL JS for geographic heatmaps and Apache ECharts for real-time dashboards, with all processing happening in the browser.
+      </p>
+    </section>
+
+    <section style="margin-bottom: 40px;">
+      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Key Findings</h2>
+      <p style="margin-bottom: 16px;">
+        Location remains the strongest predictor of housing prices, with coastal counties commanding significantly higher prices than inland regions. However, property characteristics like square footage and bedrooms show strong correlations within each county. Socioeconomic factors play a crucial role: higher household income correlates with higher prices, while crime rates show an inverse relationship—safer neighborhoods command premium values.
+      </p>
+      <p>
+        In the Airbnb market, amenities significantly impact nightly rates, and entire homes generate higher revenue than private rooms. Review scores correlate positively with price. Most importantly, our platform reveals stark differences between long-term and short-term rental markets—in some counties, Airbnb rates can far exceed traditional rental income, though with greater volatility. Our tools help users understand these trade-offs through side-by-side comparisons.
+      </p>
+    </section>
+
+    <section>
+      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Why This Matters</h2>
+      <p>
+        Understanding housing market dynamics is essential for homebuyers assessing property values, investors comparing rental returns, and policymakers identifying affordability patterns. By making complex data accessible through interactive visualizations, we empower users to explore questions that matter—from how crime rates affect property values to whether adding amenities to an Airbnb listing is worth the investment. In California's complex market, data-driven insights are essential for making informed decisions about one of life's most significant financial investments.
+      </p>
+    </section>
+
+  </div>
+</div>
+
+<div class="footer">© 2024 California Housing (Team 12). For course demo only.</div>
+
+</body>
+</html>
+
