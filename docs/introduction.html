@@ -40,37 +40,49 @@
     <section style="margin-bottom: 40px;">
       <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">The Problem We're Addressing</h2>
       <p style="margin-bottom: 16px;">
-        California's housing market is one of the most complex and expensive in the United States. Prices vary dramatically across regions—a home in San Francisco might cost three times more than a similar property in Fresno—and the factors influencing these differences aren't always obvious. At the same time, the rise of short-term rental platforms like Airbnb has created a parallel market, leaving property owners to decide between long-term rentals and potentially higher nightly rates.
+        California's housing market is one of the most complex and expensive in the United States. Prices vary dramatically across regions, a home in San Francisco might cost three times more than a similar property in Fresno, and the factors influencing these differences aren't always clear. At the same time, the rise of short-term rental platforms like Airbnb has created a parallel market, leaving property owners to decide between long-term rentals and potentially higher nightly rates.
       </p>
       <p>
-        Our project addresses these challenges by combining machine learning with interactive data visualization. We've built tools that help users predict housing prices, compare long-term and short-term rental markets, and explore the factors that drive property values across California's diverse counties.
+        Our project addresses these challenges by combining machine learning with interactive data visualization and predictive tools. We've built a platform that helps users predict housing/Airbnb prices, compare long-term and short-term rental markets, and explore the factors that drive property values across California's diverse counties.
       </p>
     </section>
 
     <section style="margin-bottom: 40px;">
       <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Our Approach</h2>
       <p style="margin-bottom: 16px;">
-        We developed a comprehensive web platform integrating predictive modeling with interactive exploration. For housing price prediction, we trained models using data from over 6,000 properties across seven major California counties, considering location, property size, neighborhood characteristics (crime rates, household income), and regional demographics. We used Random Forest, Gradient Boosting, and ensemble methods, evaluated with cross-validation to ensure reliability.
+        We combined public housing sales data (46 counties) with Airbnb listings (8 cities/counties) and augmented both with county‑level context such as population, commute modes, private school enrollment, income levels, and crime rates. After rigorous cleaning (merging sources, normalizing columns, converting text to numeric, removing missing prices, selecting key amenities, log‑transforming skewed prices), we split data into training/test sets and modeled each area separately to reflect local market behavior.
       </p>
       <p style="margin-bottom: 16px;">
-        For Airbnb market analysis, we processed over 42,000 listings, incorporating property features and amenities (AC, parking, laundry, wifi, kitchen appliances). We found amenities significantly impact pricing—properties with full amenities command 20-30% higher rates. To make insights accessible, we built interactive visualizations using MapLibre GL JS for geographic heatmaps and Apache ECharts for real-time dashboards, with all processing happening in the browser.
+        For housing, we tested Linear/Ridge/Lasso, Random Forest, and XGBoost, selecting Random Forest (200 trees) for its stronger accuracy in major markets like Los Angeles and San Francisco. For Airbnb, we built a stacked ensemble: XGBoost and Random Forest as base learners with cross‑validated out‑of‑fold predictions, combined by a simple linear meta‑model. We applied light winsorization and log transforms to stabilize extreme values and skew.
+      </p>
+      <p style="margin-bottom: 16px;">
+        We showcased the results in an interactive website with two filterable predictor tools (housing and Airbnb), a choropleth map that toggles between median home values and average nightly rates, and a dashboard of trends.
+      </p>
+      <p style="margin-bottom: 16px;">
+        Important limitation: Several free/open datasets had missing fields or too few observations in many counties, which constrained model stability and geographic scope. In practice, only a subset of counties had enough usable data to train reliable models (this is why the map and predictive tool pages have missing counties). Additionally, some added variables (e.g., commute modes, private school enrollment) contributed little predictive signal compared with core features like living space and beds/baths, and were either down‑weighted or excluded in final models.
       </p>
     </section>
 
     <section style="margin-bottom: 40px;">
       <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Key Findings</h2>
       <p style="margin-bottom: 16px;">
-        Location remains the strongest predictor of housing prices, with coastal counties commanding significantly higher prices than inland regions. However, property characteristics like square footage and bedrooms show strong correlations within each county. Socioeconomic factors play a crucial role: higher household income correlates with higher prices, while crime rates show an inverse relationship—safer neighborhoods command premium values.
+        Across both markets, size was the most consistent driver of price. For housing, larger living space and more bedrooms were strongly associated with higher property values. In the short‑term rental market, the number of beds and baths best explains nightly rates, indicating that listing capacity and layout are central to pricing decisions. Amenities also contributed to Airbnb pricing, though not all amenities mattered equally. Features such as air conditioning and parking added clear increases to nightly rates. In contrast, amenities like Wi‑Fi or TV provided weaker signals. 
       </p>
       <p>
-        In the Airbnb market, amenities significantly impact nightly rates, and entire homes generate higher revenue than private rooms. Review scores correlate positively with price. Most importantly, our platform reveals stark differences between long-term and short-term rental markets—in some counties, Airbnb rates can far exceed traditional rental income, though with greater volatility. Our tools help users understand these trade-offs through side-by-side comparisons.
+        Location and local context amplified prices. Counties and cities with coastal proximity, higher household incomes, and greater urban density such as Los Angeles, San Diego, San Francisco, and Santa Clara, showed substantially higher prices. This geographic pattern aligns with demand concentration, employment opportunities, and amenity access along California’s coast and major urban centers.
+      </p>
+      <p>
+        Model performance was moderate to strong. Housing models achieved R² = 0.60–0.86, and Airbnb models achieved R² = 0.61–0.77. Performance degraded in smaller markets such as Pacific Grove, where limited observations reduced stability and increased variance. These results reflect both the strength of core predictors and the importance of sufficient sample size for reliable inference.
+      </p>
+      <p>
+        Finally, the markets differed in their spatial dynamics. Airbnb prices varied more across coastal tourist areas, displaying seasonal and demand‑driven dispersion. Housing prices showed stronger geographic clustering and pronounced right‑skew, which improved after a log transformation that stabilized variance and reduced the influence of extreme outliers.
       </p>
     </section>
 
     <section>
-      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Why This Matters</h2>
+      <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; color: #111827;">Impact </h2>
       <p>
-        Understanding housing market dynamics is essential for homebuyers assessing property values, investors comparing rental returns, and policymakers identifying affordability patterns. By making complex data accessible through interactive visualizations, we empower users to explore questions that matter—from how crime rates affect property values to whether adding amenities to an Airbnb listing is worth the investment. In California's complex market, data-driven insights are essential for making informed decisions about one of life's most significant financial investments.
+        Our project translates complex regional price dynamics into accessible tools and insights. First, it provides a platform where users can estimate area‑specific home values or Airbnb nightly prices using key inputs such as beds, baths, square footage, and selected amenities, supporting planning and cross‑county comparisons. Second, it enhances visual understanding: the interactive map and dashboard enable effortless exploration of county‑level trends and market comparisons. Finally, it offers policy and planning relevance: by highlighting the roles of property features, the results can inform policies on affordability, zoning, and the implications of short‑term rentals. 
       </p>
     </section>
 
