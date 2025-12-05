@@ -5,6 +5,8 @@ Leverage machine learning to predict housing and Airbnb listing prices across Ca
 
 Access our site here : https://emklam.github.io/Team12_STA160_Website/index.html 
 
+Access our presentation here: https://www.canva.com/design/DAG6gO-Q3xw/q9UJc3hMbXw9a8IG1vw5hA/edit?utm_content=DAG6gO-Q3xw&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton 
+
  ### Overview
 
 California Housing Price Predictor is a class project that combines geospatial visualization with machine learning to estimate property prices and analyze Airbnb and housing market statistics across California. The site includes:
