@@ -13,16 +13,8 @@ California Housing Price Predictor is a class project that combines geospatial v
 
 • Housing Price Prediction
 
-• Housing Map Statistics
+• Airbnb Price Prediction
 
-• Airbnb Map Statistics
+• Interactive Map
 
 • Housing Trends Dashboard
-
-### Features
-
-• Interactive map with replace "tooltips, filters, and region-level aggregation"
-
-• ML-powered price predictions for housing and Airbnb listings
-
-• Housing trends dashboard 
