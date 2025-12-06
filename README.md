@@ -13,30 +13,8 @@ California Housing Price Predictor is a class project that combines geospatial v
 
 • Housing Price Prediction
 
-• Housing Map Statistics
+• Airbnb Price Prediction
 
-• Airbnb Map Statistics
+• Interactive Map
 
 • Housing Trends Dashboard
-
-### Features
-
-• Interactive map with replace "tooltips, filters, and region-level aggregation"
-
-• ML-powered price predictions for housing and Airbnb listings
-
-• Housing trends dashboard 
-
-### Architecture
-
-• Frontend: (HTML/CSS/JS)
-
-• Visualization: (OpenStreetMap)
-
-• ML: (scikit-learn/XGBoost/PyTorch)
-
-• Data: Public datasets (e.g., California housing data, Airbnb listings, county crime rate, walkability, etc.)
-
-• Hosting: GitHub Pages
-
-
