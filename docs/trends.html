@@ -15,7 +15,7 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
   <style>
-    /* ================== Dashboard ================== */
+    /* Dashboard */
     body {
       background-color: #F3F4F6;
     }
@@ -42,7 +42,7 @@
       margin: 0;
     }
 
-    /* 1. Glass Control Bar */
+    /* Glass Control Bar */
     .filters-sticky-bar {
       position: sticky;
       top: 70px;
@@ -157,7 +157,7 @@
       border-radius: 12px;
     }
     
-    /* Full-width charts (span-12) can be taller */
+    /* Full-width charts (span 12) can be taller */
     .span-12 .chart-container {
       height: 500px;
       min-height: 500px;
@@ -494,7 +494,7 @@
       .catch(err => console.log('GeoJSON Error'));
   }
 
-  // Simplified map updates (reuses existing logic but ensures chart context exists)
+  // Simplified map updates 
   function updateHousingMap(geojson) {
     const el = document.getElementById('housingMap');
     if (!el) return;
@@ -646,7 +646,7 @@
   function updateHousingCharts() {
     if (filteredHousingData.length === 0) return;
 
-    // 1. Price Over Time (Trend)
+    // Price Over Time (Trend)
     const priceOverTimeEl = document.getElementById('priceOverTime');
     if (!charts.priceOverTime) charts.priceOverTime = echarts.init(priceOverTimeEl);
 
@@ -667,7 +667,7 @@
       series: [{ type: 'line', data: countyAverages.map(d => d.avgPrice), smooth: true, itemStyle: { color: '#2563EB' }, lineStyle: { width: 3 } }]
     });
 
-    // 2. Price Distribution
+    // Price Distribution
     const priceDistEl = document.getElementById('priceDistribution');
     if (!charts.priceDistribution) charts.priceDistribution = echarts.init(priceDistEl);
     const prices = filteredHousingData.map(d => d.price).sort((a, b) => a - b);
@@ -684,7 +684,7 @@
       series: [{ type: 'bar', data: histogram, itemStyle: { color: '#60A5FA' } }]
     });
 
-    // 3. Size vs Price
+    // Size vs Price
     const sizeVsPriceEl = document.getElementById('sizeVsPrice');
     if (!charts.sizeVsPrice) charts.sizeVsPrice = echarts.init(sizeVsPriceEl);
     const sizePriceData = filteredHousingData.filter(d => d.livingSpace > 0 && d.price > 0).map(d => [d.livingSpace, d.price]);
@@ -695,7 +695,7 @@
       series: [{ type: 'scatter', data: sizePriceData, symbolSize: 4, itemStyle: { color: '#2563EB', opacity: 0.5 } }]
     });
 
-    // 4. Price by County (Bar)
+    // Price by County (Bar)
     const priceByCountyEl = document.getElementById('priceByCounty');
     if (!charts.priceByCounty) charts.priceByCounty = echarts.init(priceByCountyEl);
     charts.priceByCounty.setOption({
@@ -705,7 +705,7 @@
       series: [{ type: 'bar', data: countyAverages.map(d=>d.avgPrice), itemStyle: { color: '#3B82F6', borderRadius: [4, 4, 0, 0] } }]
     });
 
-    // 5. Crime & Income (Placeholders if IDs exist)
+    // Crime & Income (Placeholders if IDs exist)
     const crimeEl = document.getElementById('priceVsCrime');
     if (crimeEl) {
        if (!charts.priceVsCrime) charts.priceVsCrime = echarts.init(crimeEl);
@@ -731,7 +731,7 @@
   function updateAirbnbCharts() {
     if (filteredAirbnbData.length === 0) return;
 
-    // 1. Room Type
+    // Room Type
     const rtEl = document.getElementById('airbnbRoomType');
     if (!charts.airbnbRoomType) charts.airbnbRoomType = echarts.init(rtEl);
     const rtCounts = {};
@@ -745,12 +745,12 @@
       }]
     });
 
-    // 2. Distribution
+    // Distribution
     const distEl = document.getElementById('airbnbPriceDist');
     if (!charts.airbnbPriceDist) charts.airbnbPriceDist = echarts.init(distEl);
     const prices = filteredAirbnbData.map(d => d.price).sort((a, b) => a - b);
-    // ... simple histogram logic similar to above ...
-    // For brevity, basic histogram:
+
+    // basic histogram:
     charts.airbnbPriceDist.setOption({
   grid: {
     left: 50, right: 20, top: 30, bottom: 40, containLabel: true
@@ -764,7 +764,7 @@
   }]
 });
 
-    // 3. Bedrooms
+    // Bedrooms
     const bedEl = document.getElementById('airbnbBedrooms');
     if (!charts.airbnbBedrooms) charts.airbnbBedrooms = echarts.init(bedEl);
     // logic placeholders
@@ -778,7 +778,7 @@
 });
 
 
-    // 4. Reviews
+    // Reviews
     const revEl = document.getElementById('priceVsReviews');
     if (!charts.priceVsReviews) charts.priceVsReviews = echarts.init(revEl);
     const revData = filteredAirbnbData.map(d => [d.reviewScores, d.price]);
